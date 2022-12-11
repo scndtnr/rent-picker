@@ -1,0 +1,44 @@
+[workspace]
+members = [
+    "cui",
+    "infra",
+    "adapter",
+    "usecase",
+    "domain"
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+description = "Tool to get rental information by web scraping in Rust"
+
+
+[workspace.dependencies]
+# ローカルクレート
+infra = {path = "./infra"}
+adapter = {path = "./adapter"}
+usecase = {path = "./usecase"}
+domain = {path = "./domain"}
+
+# infra
+anyhow = "1.0.66"
+async-trait = "0.1.59"
+chromiumoxide = { git = "https://github.com/mattsse/chromiumoxide", features = ["tokio-runtime"], default-features = false, branch = "main"}
+chrono = "0.4.23"
+dotenv = "0.15.0"
+futures = "0.3.25"
+regex = "1.7.0"
+tempfile = "3.3.0"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1.37"
+tracing-appender = "0.2.2"
+tracing-bunyan-formatter = "0.3.4"
+tracing-subscriber = "0.3.16"
+
+# adapter
+serde = "1.0.147"
+serde_derive = "1.0.147"
+derive-new = "0.5.9"
+
+# cui
+clap = { version = "4.0.18", features = ["derive"] }

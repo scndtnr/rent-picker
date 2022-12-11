@@ -1,0 +1,15 @@
+[package]
+name = "cui"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+
+
+[dependencies]
+infra.workspace = true
+domain.workspace = true
+usecase.workspace = true
+adapter.workspace = true
+tokio.workspace = true
+clap.workspace = true
+tracing.workspace = true

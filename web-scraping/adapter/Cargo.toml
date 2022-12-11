@@ -1,0 +1,14 @@
+[package]
+name = "adapter"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+
+
+[dependencies]
+usecase.workspace = true
+domain.workspace = true
+tracing.workspace = true
+serde.workspace = true
+serde_derive.workspace = true
+derive-new.workspace = true

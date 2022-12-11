@@ -1,0 +1,16 @@
+[package]
+name = "domain"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+regex.workspace = true
+mockall = {version = "0.11.3", optional = true }
+
+[features]
+mock = ["dep:mockall"]
