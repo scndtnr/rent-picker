@@ -377,6 +377,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
+ "derive-new",
  "mockall",
  "regex",
 ]
