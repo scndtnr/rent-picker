@@ -24,3 +24,4 @@ reqwest.workspace = true
 scraper.workspace = true
 serde.workspace = true
 serde_derive.workspace = true
+derive-new.workspace = true

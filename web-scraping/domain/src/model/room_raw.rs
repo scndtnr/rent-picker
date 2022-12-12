@@ -3,7 +3,6 @@ use derive_new::new;
 #[allow(clippy::too_many_arguments)]
 #[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RoomRaw {
-    url: String,
     建物名: String,
     家賃: String,
     管理費共益費: String,

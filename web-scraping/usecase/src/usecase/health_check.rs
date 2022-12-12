@@ -15,9 +15,8 @@ impl<R: Repositories> HealthCheckUsecase<R> {
     pub async fn health_check_suumo(&self) -> Result<()> {
         // 前準備
         let crawler = self.suumo_repo.new_crawler().await;
-        let selector = self.suumo_repo.new_selector().await;
 
         // ヘルスチェック結果を返す
-        self.suumo_repo.health_check(&crawler, &selector).await
+        self.suumo_repo.health_check(&crawler).await
     }
 }

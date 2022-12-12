@@ -8,6 +8,7 @@ mod room_sanitize;
 mod rooms;
 mod target_area;
 
+pub use as_vec::AsVec;
 pub use jst::Jst;
 pub use residence::Residence;
 pub use residences::Residences;

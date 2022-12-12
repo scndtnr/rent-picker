@@ -2,75 +2,13 @@ use anyhow::{bail, Context, Result};
 use domain::model::TargetArea;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-pub struct SearchQueryParams {
-    ar: String,
-    bs: String,
-    pc: String,
-    #[serde(rename = "ekInput")]
-    ek_input: String,
-    #[serde(rename = "toEki")]
-    to_eki: String,
-    tj: String,
-    nk: String,
-    ta: String,
-    cb: String,
-    ct: String,
-    et: String,
-    cn: String,
-    mb: String,
-    mt: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "kz")]
-    kz1: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "kz")]
-    kz2: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tc: Option<String>,
-    shkr1: String,
-    shkr2: String,
-    shkr3: String,
-    shkr4: String,
-    fw2: String,
-}
-
-impl Default for SearchQueryParams {
-    fn default() -> Self {
-        Self::builder().最寄り駅("八王子").build().unwrap()
-    }
-}
-
-impl SearchQueryParams {
-    pub fn builder() -> SearchQueryParamsBuilder {
-        SearchQueryParamsBuilder::default()
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-pub enum Transfers {
-    こだわらない,
-    乗り換えなし,
-    乗り換え1回以内,
-    乗り換え2回以内,
-}
-
-impl std::fmt::Display for Transfers {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Transfers::こだわらない => write!(f, "-1"),
-            Transfers::乗り換えなし => write!(f, "0"),
-            Transfers::乗り換え1回以内 => write!(f, "1"),
-            Transfers::乗り換え2回以内 => write!(f, "2"),
-        }
-    }
-}
+use super::{builder_fields::Transfers, SearchQueryParams};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct SearchQueryParamsBuilder {
     hidden_検索フォーム_ar: String,
     hidden_検索フォーム_bs: String,
-    hidden_検索フォーム_pc: String,
+    hidden_ページあたりの件数_pc: String,
     hidden_最寄り駅入力: String,
     最寄り駅: Option<String>,
     電車での所要時間: String,
@@ -97,7 +35,7 @@ impl Default for SearchQueryParamsBuilder {
         Self {
             hidden_検索フォーム_ar: "030".to_string(),
             hidden_検索フォーム_bs: "040".to_string(),
-            hidden_検索フォーム_pc: "30".to_string(),
+            hidden_ページあたりの件数_pc: "50".to_string(),
             hidden_最寄り駅入力: "".to_string(),
             最寄り駅: None,
             電車での所要時間: "10".to_string(),
@@ -178,48 +116,47 @@ impl SearchQueryParamsBuilder {
     }
 
     pub fn build(self) -> Result<SearchQueryParams> {
-        Ok(SearchQueryParams {
-            ar: self.hidden_検索フォーム_ar,
-            bs: self.hidden_検索フォーム_bs,
-            pc: self.hidden_検索フォーム_pc,
-            ek_input: self.hidden_最寄り駅入力,
-            to_eki: self
-                .最寄り駅
+        Ok(SearchQueryParams::new(
+            self.hidden_検索フォーム_ar,
+            self.hidden_検索フォーム_bs,
+            self.hidden_ページあたりの件数_pc,
+            self.hidden_最寄り駅入力,
+            self.最寄り駅
                 .with_context(|| format!("Field `{}` is mandatory.", "'to_eki' or '最寄り駅'"))?,
-            tj: self.電車での所要時間,
-            nk: self.乗り換え回数.to_string(),
-            ta: match self.住みたいエリア {
+            self.電車での所要時間,
+            self.乗り換え回数.to_string(),
+            match self.住みたいエリア {
                 TargetArea::Tokyo => "13".to_string(),
                 TargetArea::Kanagawa => "14".to_string(),
                 TargetArea::Saitama => "11".to_string(),
                 TargetArea::Chiba => "12".to_string(),
             },
-            cb: self.賃料下限.unwrap(),
-            ct: self.賃料上限.unwrap(),
-            et: self.駅徒歩,
-            cn: self.築後年数.unwrap(),
-            mb: self.専有面積下限.unwrap(),
-            mt: self.専有面積上限.unwrap(),
-            kz1: if self.鉄筋系 {
+            self.賃料下限.unwrap(),
+            self.賃料上限.unwrap(),
+            self.駅徒歩,
+            self.築後年数.unwrap(),
+            self.専有面積下限.unwrap(),
+            self.専有面積上限.unwrap(),
+            if self.鉄筋系 {
                 Some("1".to_string())
             } else {
                 None
             },
-            kz2: if self.鉄骨系 {
+            if self.鉄骨系 {
                 Some("2".to_string())
             } else {
                 None
             },
-            tc: if self.バストイレ別 {
+            if self.バストイレ別 {
                 Some("0400301".to_string())
             } else {
                 None
             },
-            shkr1: self.hidden_周辺環境1,
-            shkr2: self.hidden_周辺環境2,
-            shkr3: self.hidden_周辺環境3,
-            shkr4: self.hidden_周辺環境4,
-            fw2: self.hidden_テキストボックス,
-        })
+            self.hidden_周辺環境1,
+            self.hidden_周辺環境2,
+            self.hidden_周辺環境3,
+            self.hidden_周辺環境4,
+            self.hidden_テキストボックス,
+        ))
     }
 }

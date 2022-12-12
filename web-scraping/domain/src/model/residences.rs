@@ -4,6 +4,12 @@ use derive_new::new;
 #[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Residences(Vec<Residence>);
 
+impl From<Vec<Residence>> for Residences {
+    fn from(residences: Vec<Residence>) -> Self {
+        Self::new(residences)
+    }
+}
+
 impl AsVec for Residences {
     type Item = Residence;
 

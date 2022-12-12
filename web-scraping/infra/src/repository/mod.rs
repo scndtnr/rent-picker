@@ -1,7 +1,7 @@
 mod crawler;
 mod suumo;
 
-pub(self) use crawler::ReqwestCrawler;
+pub(self) use crawler::{HtmlParser, ReqwestCrawler};
 use domain::repository::Repositories;
 use suumo::SuumoRepositoryImpl;
 
