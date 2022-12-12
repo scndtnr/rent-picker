@@ -1,4 +1,4 @@
 mod request;
 mod response;
 
-pub use request::RequestDto;
+pub use request::{RequestDto, SuumoRequestDto};

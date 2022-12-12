@@ -23,7 +23,8 @@ domain = {path = "./domain"}
 # infra
 anyhow = "1.0.66"
 async-trait = "0.1.59"
-chromiumoxide = { git = "https://github.com/mattsse/chromiumoxide", features = ["tokio-runtime"], default-features = false, branch = "main"}
+reqwest = "0.11.13"
+scraper = "0.13.0"
 chrono = "0.4.23"
 dotenv = "0.15.0"
 futures = "0.3.25"
@@ -39,6 +40,10 @@ tracing-subscriber = "0.3.16"
 serde = "1.0.147"
 serde_derive = "1.0.147"
 derive-new = "0.5.9"
+
+# domain
+url = "2.3.1"
+
 
 # cui
 clap = { version = "4.0.18", features = ["derive"] }

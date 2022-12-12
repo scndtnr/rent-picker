@@ -1,5 +1,5 @@
 use anyhow::{bail, Ok, Result};
-use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, FixedOffset, NaiveDate, TimeZone, Utc};
 use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -26,10 +26,6 @@ impl Jst {
             .with_ymd_and_hms(year, month, day, 0, 0, 0)
             .unwrap()
             .date_naive()
-    }
-
-    pub(crate) fn from_native_datetime(dt: &NaiveDateTime) -> DateTime<FixedOffset> {
-        Self::offset().from_local_datetime(dt).unwrap()
     }
 
     /// Suumoの情報更新日の場合："%Y/%m/%d"
@@ -63,7 +59,13 @@ impl Jst {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDateTime;
+
     use super::*;
+
+    fn from_native_datetime(dt: &NaiveDateTime) -> DateTime<FixedOffset> {
+        Jst::offset().from_local_datetime(dt).unwrap()
+    }
 
     #[test]
     fn date_from_str() {
@@ -92,7 +94,7 @@ mod tests {
 
         // DateとしてパースしたものとDatetimeとしてパースしたものの比較
         // Datetimeの方が時分秒の分、大きい値になるはず
-        assert!(Jst::from_native_datetime(&dt_from_date) < dt);
+        assert!(from_native_datetime(&dt_from_date) < dt);
     }
 
     #[test]

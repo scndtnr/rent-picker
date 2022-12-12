@@ -1,0 +1,38 @@
+use derive_new::new;
+
+#[allow(clippy::too_many_arguments)]
+#[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct RoomRaw {
+    url: String,
+    建物名: String,
+    家賃: String,
+    管理費共益費: String,
+    敷金: String,
+    礼金: String,
+    保証金: String,
+    敷引償却: String,
+    所在地: String,
+    駅徒歩: String,
+    間取り: String,
+    専有面積: String,
+    築年数: String,
+    階: String,
+    向き: String,
+    建物種別: String,
+    部屋の特徴設備: String,
+    間取り詳細: String,
+    構造: String,
+    階建: String,
+    築年月: String,
+    損保: String,
+    駐車場: String,
+    入居: String,
+    取引態様: String,
+    条件: String,
+    取り扱い店舗物件コード: String,
+    suumo物件コード: String,
+    情報更新日: String,
+    次回更新日: String,
+    契約期間: String,
+    備考: String,
+}

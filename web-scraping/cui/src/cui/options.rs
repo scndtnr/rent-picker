@@ -9,22 +9,54 @@
 pub(crate) struct Options {
     #[command(subcommand, help = "実施したい処理を指定する")]
     pub(super) task: Task,
-    #[arg(short, long, value_enum, default_value_t=Target::Suumo, help = "対象サービスを指定する")]
-    pub(super) target: Target,
-    #[arg(long, help = "仮実行にするboolフラグ")]
-    pub(super) dry_run: bool,
 }
 
 #[derive(Debug, Clone, clap::Subcommand, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) enum Task {
     /// ターゲットのヘルスチェックをする
-    HealthCheck,
+    HealthCheck(HealthCheck),
     /// Webスクレイピングをする
-    WebScrape,
+    WebScrape(WebScrape),
+}
+
+#[derive(Debug, Clone, clap::Args, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) struct HealthCheck {
+    #[arg(short, long, value_enum, default_value_t=Service::Suumo, help = "対象サービスを指定する")]
+    pub(super) target: Service,
+}
+
+#[derive(Debug, Clone, clap::Args, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) struct WebScrape {
+    #[arg(short, long, value_enum, default_value_t=Service::Suumo, help = "対象サービスを指定する")]
+    pub(super) service: Service,
+    #[arg(short, long, value_enum, default_value_t=Area::Tokyo, help = "検索対象エリアを指定する")]
+    pub(super) area: Area,
+    #[arg(help = "最寄り駅を指定する")]
+    pub(super) station: String,
+    #[arg(long, help = "仮実行にするboolフラグ")]
+    pub(super) dry_run: bool,
 }
 
 #[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum Target {
-    /// Suumoの賃貸情報を対象とする
+pub(super) enum Service {
     Suumo,
+}
+
+#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) enum Area {
+    Tokyo,
+    Kanagawa,
+    Saitama,
+    Chiba,
+}
+
+impl std::fmt::Display for Area {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Area::Tokyo => write!(f, "Tokyo"),
+            Area::Kanagawa => write!(f, "Kanagawa"),
+            Area::Saitama => write!(f, "Saitama"),
+            Area::Chiba => write!(f, "Chiba"),
+        }
+    }
 }

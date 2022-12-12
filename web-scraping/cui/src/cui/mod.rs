@@ -1,7 +1,7 @@
 mod options;
 
-use self::options::{Options, Target, Task};
-use adapter::{dto::RequestDto, Controller};
+use self::options::{Options, Service, Task, WebScrape};
+use adapter::{dto::SuumoRequestDto, Controller};
 use clap::Parser;
 use infra::{RepositoryImpls, UsecaseImpls};
 
@@ -25,36 +25,33 @@ impl Cui {
     #[tracing::instrument(skip_all)]
     pub(super) async fn process_cmd(&self) {
         match &self.opts.task {
-            Task::HealthCheck => match &self.opts.target {
-                Target::Suumo => self.process_health_check_suumo(&self.opts).await,
+            Task::HealthCheck(args) => match args.target {
+                Service::Suumo => self.process_health_check_suumo().await,
             },
-            Task::WebScrape => match &self.opts.target {
-                Target::Suumo => self.process_web_scrape_suumo(&self.opts).await,
+            Task::WebScrape(args) => match args.service {
+                Service::Suumo => self.process_web_scrape_suumo(args).await,
             },
         }
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_health_check_suumo(&self, opts: &Options) {
-        tracing::debug!("web_scrape args : {:#?}", opts);
-        let dto = RequestDto::new(opts.dry_run);
+    async fn process_health_check_suumo(&self) {
         // エラーにならなかったらOK扱い
-        self.controller.health_check_suumo(dto).await;
+        self.controller.health_check_suumo().await;
 
         // 結果表示
         tracing::info!("Summo health check is ok.");
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_web_scrape_suumo(&self, opts: &Options) {
-        tracing::debug!("web_scrape args : {:#?}", opts);
-        let _dto = RequestDto::new(opts.dry_run);
+    async fn process_web_scrape_suumo(&self, args: &WebScrape) {
+        tracing::debug!("web_scrape args : {:#?}", args);
+        let dto = SuumoRequestDto::new(args.area.to_string(), args.station.clone(), args.dry_run);
 
-        todo!()
+        let res = self.controller.search_rent_suumo(dto).await;
 
-        // let res = self.controller.
-
-        // // 結果表示
-        // tracing::info!("{}", res);
+        // 結果表示
+        // todo!("DTOを表示する形に修正する")
+        tracing::info!("{:#?}", res);
     }
 }

@@ -12,6 +12,9 @@ derive-new.workspace = true
 chrono.workspace = true
 regex.workspace = true
 mockall = {version = "0.11.3", optional = true }
+url.workspace = true
+serde.workspace = true
+serde_derive.workspace = true
 
 [features]
 mock = ["dep:mockall"]

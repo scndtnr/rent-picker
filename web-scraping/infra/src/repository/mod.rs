@@ -1,7 +1,7 @@
 mod crawler;
 mod suumo;
 
-pub(self) use crawler::{ChromiumoxideCrawler, Crawler};
+pub(self) use crawler::ReqwestCrawler;
 use domain::repository::Repositories;
 use suumo::SuumoRepositoryImpl;
 
