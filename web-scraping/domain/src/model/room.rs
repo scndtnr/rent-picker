@@ -1,22 +1,22 @@
-use super::{RoomRaw, RoomSanitize};
+use super::{RoomHeader, RoomRaw, RoomSanitize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Room {
-    url: String,
+    header: RoomHeader,
     raw: Option<RoomRaw>,
     sanitize: Option<RoomSanitize>,
 }
 
-impl From<String> for Room {
-    fn from(url: String) -> Self {
-        Self::new(url)
+impl From<RoomHeader> for Room {
+    fn from(header: RoomHeader) -> Self {
+        Self::new(header)
     }
 }
 
 impl Room {
-    pub fn new(url: String) -> Self {
+    pub fn new(header: RoomHeader) -> Self {
         Self {
-            url,
+            header,
             raw: None,
             sanitize: None,
         }
@@ -28,8 +28,8 @@ impl Room {
         self.sanitize = Some(sanitize)
     }
 
-    pub fn url(&self) -> &str {
-        &self.url
+    pub fn header(&self) -> &RoomHeader {
+        &self.header
     }
 
     pub fn raw(&self) -> &Option<RoomRaw> {

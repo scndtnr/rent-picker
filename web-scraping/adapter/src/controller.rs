@@ -1,4 +1,4 @@
-use domain::model::Residences;
+use domain::model::Rooms;
 use usecase::usecase::Usecases;
 
 use crate::dto::SuumoRequestDto;
@@ -21,7 +21,7 @@ impl<U: Usecases> Controller<U> {
             .expect("Fail to health check of suumo.");
     }
 
-    pub async fn search_rent_suumo(&self, dto: SuumoRequestDto) -> Residences {
+    pub async fn search_rent_suumo(&self, dto: SuumoRequestDto) -> Rooms {
         self.usecases
             .search_rent_usecase()
             .search_rent_suumo(

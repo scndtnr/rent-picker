@@ -1,6 +1,6 @@
 use anyhow::Result;
 use domain::{
-    model::{AsVec, Residences, TargetArea},
+    model::{AsVec, Rooms, TargetArea},
     repository::{Repositories, SuumoRepository},
 };
 
@@ -15,17 +15,17 @@ impl<R: Repositories> SearchRentUsecase<R> {
     }
 
     #[tracing::instrument(skip_all, err(Debug))]
-    pub async fn search_rent_suumo(&self, area: TargetArea, station: &str) -> Result<Residences> {
+    pub async fn search_rent_suumo(&self, area: TargetArea, station: &str) -> Result<Rooms> {
         // 前準備
         let crawler = self.suumo_repo.new_crawler().await;
 
         // 指定した地域・通勤先の駅を元に賃貸情報を取得する
-        let residences = self
+        let rooms = self
             .suumo_repo
-            .residences_by_area_and_station(&crawler, area, station)
+            .rooms_by_area_and_station(&crawler, area, station)
             .await?;
-        tracing::info!("{:#?}", residences.len());
+        tracing::info!("{:#?}", rooms.len());
 
-        Ok(residences)
+        Ok(rooms)
     }
 }

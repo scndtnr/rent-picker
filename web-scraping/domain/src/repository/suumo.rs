@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::model::{Residences, TargetArea};
+use crate::model::{Rooms, TargetArea};
 
 #[cfg_attr(feature = "mock", mockall::automock(type Crawler=();))]
 #[async_trait::async_trait]
@@ -14,10 +14,10 @@ pub trait SuumoRepository {
     async fn health_check(&self, crawler: &Self::Crawler) -> Result<()>;
 
     /// 住居の属する地域や、通勤先の駅を指定して、賃貸情報を取得する
-    async fn residences_by_area_and_station(
+    async fn rooms_by_area_and_station(
         &self,
         crawler: &Self::Crawler,
         area: TargetArea,
         station: &str,
-    ) -> Result<Residences>;
+    ) -> Result<Rooms>;
 }

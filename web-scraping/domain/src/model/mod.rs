@@ -1,9 +1,7 @@
 mod as_vec;
 mod jst;
-mod residence;
-mod residence_header;
-mod residences;
 mod room;
+mod room_header;
 mod room_raw;
 mod room_sanitize;
 mod rooms;
@@ -11,10 +9,8 @@ mod target_area;
 
 pub use as_vec::AsVec;
 pub use jst::Jst;
-pub use residence::Residence;
-pub use residence_header::ResidenceHeader;
-pub use residences::Residences;
 pub use room::Room;
+pub use room_header::RoomHeader;
 pub use room_raw::RoomRaw;
 pub use room_sanitize::RoomSanitize;
 pub use rooms::Rooms;

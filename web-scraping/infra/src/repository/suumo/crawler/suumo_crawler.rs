@@ -4,7 +4,7 @@ use crate::{
     repository::{crawler::HttpClient, HtmlParser},
 };
 use anyhow::{bail, Context, Result};
-use domain::model::{Residence, ResidenceHeader, Residences, Room, TargetArea};
+use domain::model::{Jst, Room, RoomHeader, Rooms, TargetArea};
 use reqwest::Url;
 
 #[async_trait::async_trait]
@@ -89,44 +89,55 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
-    async fn residences_in_list_page(
+    async fn rooms_in_list_page(
         &self,
         url: &Url,
         area: TargetArea,
         station: &str,
-    ) -> Result<Residences> {
+    ) -> Result<Rooms> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
 
         // 住居情報を取得する
         let url_domain = format!("{}://{}", url.scheme(), url.domain().unwrap());
         let text = res.text().await?;
-        let residences = {
+        let rooms: Rooms = {
             let html = self.parse_html(&text);
             self.find_elements(&html, self.residence_root())
                 .into_iter()
-                .map(|element| {
-                    let name =
+                .flat_map(|element| {
+                    // 住居情報を取得する
+                    let residence_title =
                         self.find_inner_text_by_element(&element, self.residence_name(), ",");
-                    let transfer =
+                    let residence_transfer =
                         self.find_inner_text_by_element(&element, self.residence_transfer(), "\n");
+
+                    //  各部屋のURLを取得し、Room構造体のVecに変換する
                     let rooms: Vec<Room> = self
                         .find_elements_by_element(&element, self.room_path())
                         .into_iter()
                         .map(|room| room.value().attr("href").expect("Fail to get room path."))
                         .map(|path| format!("{}{}", &url_domain, path))
-                        .map(|url| url.into())
-                        .collect::<Vec<Room>>();
-                    Residence::new(
-                        ResidenceHeader::new(name, transfer, area.clone(), station.to_string()),
-                        rooms.into(),
-                    )
+                        .into_iter()
+                        .map(|url| {
+                            RoomHeader::new(
+                                url,
+                                residence_title.clone(),
+                                residence_transfer.clone(),
+                                area.clone(),
+                                station.to_string(),
+                                Jst::now(),
+                            )
+                        })
+                        .map(|header| header.into())
+                        .collect();
+                    rooms
                 })
-                .collect::<Vec<Residence>>()
+                .collect::<Vec<Room>>()
+                .into()
         };
-        let residences: Residences = residences.into();
-        tracing::info!("{:#?}", residences);
+        tracing::info!("{:#?}", rooms);
 
-        Ok(residences)
+        Ok(rooms)
     }
 }

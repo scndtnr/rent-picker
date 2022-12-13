@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use domain::{
-    model::{AsVec, Residence, Residences, TargetArea},
+    model::{AsVec, Room, Rooms, TargetArea},
     repository::SuumoRepository,
 };
 use futures::{stream, StreamExt, TryStreamExt};
@@ -41,12 +41,12 @@ impl SuumoRepository for SuumoRepositoryImpl {
 
     /// 住居の属する地域や、通勤先の駅を指定して、賃貸情報を取得する
     #[tracing::instrument(skip_all, fields(area=area.to_string(), station=station) err(Debug))]
-    async fn residences_by_area_and_station(
+    async fn rooms_by_area_and_station(
         &self,
         crawler: &Self::Crawler,
         area: TargetArea,
         station: &str,
-    ) -> Result<Residences> {
+    ) -> Result<Rooms> {
         // 検索条件を選択し、賃貸一覧ページの1ページ目のURLを取得する
         let url = crawler.url_of_room_list(area.clone(), station).await?;
 
@@ -62,23 +62,23 @@ impl SuumoRepository for SuumoRepositoryImpl {
         } else {
             urls[0..max_page].to_vec()
         };
-        let residences_vec: Vec<Residences> = stream::iter(urls)
+        let rooms_vec: Vec<Rooms> = stream::iter(urls)
             .map(|url| (url, area.clone(), station.to_string()))
             .map(|(url, area, station)| async move {
-                let residences = match crawler.residences_in_list_page(&url, area, &station).await {
-                    Ok(residences) => residences,
-                    Err(e) => bail!("Fail to parse residence infomation. {:#?}", e),
+                let rooms = match crawler.rooms_in_list_page(&url, area, &station).await {
+                    Ok(rooms) => rooms,
+                    Err(e) => bail!("Fail to parse rooms infomation. {:#?}", e),
                 };
-                Ok(residences)
+                Ok(rooms)
             })
             .buffer_unordered(buffered_n)
             .try_collect()
             .await?;
-        let resindences: Residences = residences_vec
+        let rooms: Rooms = rooms_vec
             .into_iter()
-            .flat_map(|residences| residences.into_inner())
-            .collect::<Vec<Residence>>()
+            .flat_map(|rooms| rooms.into_inner())
+            .collect::<Vec<Room>>()
             .into();
-        Ok(resindences)
+        Ok(rooms)
     }
 }
