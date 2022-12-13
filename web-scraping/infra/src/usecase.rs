@@ -3,7 +3,7 @@ use usecase::{usecase::SearchRentUsecase, HealthCheckUsecase, Usecases};
 
 use crate::RepositoryImpls;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone)]
 pub struct UsecaseImpls {
     health_check_usecase: HealthCheckUsecase<RepositoryImpls>,
     search_rent_usecase: SearchRentUsecase<RepositoryImpls>,

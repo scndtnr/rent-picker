@@ -3,17 +3,18 @@ mod options;
 use self::options::{Options, Service, Task, WebScrape};
 use adapter::{dto::SuumoRequestDto, Controller};
 use clap::Parser;
-use infra::{RepositoryImpls, UsecaseImpls};
+use infra::{persistence::sqlite::SqliteDb, RepositoryImpls, UsecaseImpls};
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Debug)]
 pub(super) struct Cui {
     controller: Controller<UsecaseImpls>,
     opts: Options,
 }
 
 impl Cui {
-    pub(super) fn new() -> Self {
-        let repository = RepositoryImpls::new();
+    pub(super) async fn new() -> Self {
+        let db = SqliteDb::new().await;
+        let repository = RepositoryImpls::new(db);
         let usecases = UsecaseImpls::new(repository);
         let controller = Controller::new(usecases);
         Self {

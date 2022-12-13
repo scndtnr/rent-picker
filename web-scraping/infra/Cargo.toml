@@ -25,3 +25,4 @@ scraper.workspace = true
 serde.workspace = true
 serde_derive.workspace = true
 derive-new.workspace = true
+sqlx.workspace = true
