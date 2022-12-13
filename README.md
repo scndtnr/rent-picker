@@ -6,6 +6,7 @@ Rustで賃貸情報をスクレイピングし、Pythonで機械学習させて�
 
 `web-scraping` では、Rustを用いて住宅情報サイトから賃貸情報を取得し、Sqliteに保存する。
 `machine-learning` では、Pythonを用いてSqliteのデータを読み出し、LightGBMにて学習と推論を行う。
+`sql-ddl` では、両者を繋ぐ sqlite のDDLを管理する。
 
 ### `web-scraping` (Rust)
 
@@ -23,6 +24,20 @@ Rustで賃貸情報をスクレイピングし、Pythonで機械学習させて�
 
 色々未定だが、[python-fire](https://github.com/google/python-fire)を利用したCLIツールにする予定。
 
+
+
+## `sql-ddl` (sqldef によるスキーマ管理)
+
+[k0kubun/sqldef](https://github.com/k0kubun/sqldef)で利用するためのDDLを置く。
+sqldef のバイナリは[リリースページ](https://github.com/k0kubun/sqldef/releases)からダウンロードしてプロジェクトルートに配置し、下記のように利用する。
+
+```
+# template
+sqlite3def --file=<sql_file_path> <db_name>
+
+# example
+./sqlite3def --file=sql-ddl/create_table_room_header.sql rent-picker.sqlite3
+```
 
 
 ## スクレイピング対象サービスの利用規約

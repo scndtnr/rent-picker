@@ -1,2 +1,4 @@
 .history
 rent-picker.db
+sqlite3def.exe
+rent-picker.sqlite3
