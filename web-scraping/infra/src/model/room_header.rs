@@ -33,7 +33,7 @@ impl TryFrom<RoomHeaderTable> for RoomHeader {
             header.residence_transfer,
             header.residence_area.try_into()?,
             header.residence_station,
-            Jst::from_native_datetime(&header.created_at),
+            Jst::from_utc_datetime(&header.created_at),
         ))
     }
 }

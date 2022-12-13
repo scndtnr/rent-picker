@@ -28,7 +28,11 @@ impl Jst {
             .date_naive()
     }
 
-    pub fn from_native_datetime(dt: &NaiveDateTime) -> DateTime<FixedOffset> {
+    pub fn from_utc_datetime(dt: &NaiveDateTime) -> DateTime<FixedOffset> {
+        Jst::offset().from_utc_datetime(dt)
+    }
+
+    pub fn from_local_datetime(dt: &NaiveDateTime) -> DateTime<FixedOffset> {
         Jst::offset().from_local_datetime(dt).unwrap()
     }
 
@@ -92,7 +96,7 @@ mod tests {
 
         // DateとしてパースしたものとDatetimeとしてパースしたものの比較
         // Datetimeの方が時分秒の分、大きい値になるはず
-        assert!(Jst::from_native_datetime(&dt_from_date) < dt);
+        assert!(Jst::from_local_datetime(&dt_from_date) < dt);
     }
 
     #[test]
