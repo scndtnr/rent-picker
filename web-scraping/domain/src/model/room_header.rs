@@ -15,7 +15,7 @@ pub struct RoomHeader {
 
 impl RoomHeader {
     pub fn url(&self) -> &str {
-        &self.residence_title
+        &self.url
     }
     pub fn residence_title(&self) -> &str {
         &self.residence_title
