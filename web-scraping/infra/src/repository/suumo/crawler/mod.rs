@@ -2,7 +2,7 @@ mod search_query;
 mod selector;
 mod suumo_crawler;
 
-pub(self) use search_query::{SearchQueryParams, Transfers};
+pub(self) use search_query::{SearchQueryParams, SortType, Transfers};
 pub(self) use selector::SuumoSelector;
 pub(super) use suumo_crawler::SuumoCrawler;
 

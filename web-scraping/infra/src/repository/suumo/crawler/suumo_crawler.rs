@@ -1,4 +1,4 @@
-use super::{selector::SuumoSelector, SearchQueryParams, Transfers};
+use super::{selector::SuumoSelector, SearchQueryParams, SortType, Transfers};
 use crate::{
     env::get_env_var,
     repository::{crawler::HttpClient, HtmlParser},
@@ -42,6 +42,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
             .鉄筋系(true)
             .鉄骨系(true)
             .バストイレ別(true)
+            .並び替え(SortType::新着順)
             .build()?;
 
         // ルーム一覧画面のURLを取得する

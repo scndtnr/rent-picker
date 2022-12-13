@@ -34,6 +34,7 @@ pub struct SearchQueryParams {
     shkr3: String,
     shkr4: String,
     fw2: String,
+    po1: String,
 }
 
 impl Default for SearchQueryParams {
