@@ -21,14 +21,14 @@ impl<U: Usecases> Controller<U> {
             .expect("Fail to health check of suumo.");
     }
 
-    pub async fn search_rent_suumo(&self, dto: SuumoRequestDto) -> Rooms {
+    pub async fn scrape_rooms_from_suumo(&self, dto: SuumoRequestDto) -> Rooms {
         self.usecases
-            .search_rent_usecase()
-            .search_rent_suumo(
+            .scrape_rooms_usecase()
+            .scrape_rooms_from_suumo(
                 dto.area.try_into().expect("Fail to convert target area."),
                 &dto.station,
             )
             .await
-            .expect("Fail to search rent.")
+            .expect("Fail to scrape rooms from Suumo.")
     }
 }

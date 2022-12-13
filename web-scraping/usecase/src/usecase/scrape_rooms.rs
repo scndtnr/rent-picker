@@ -5,17 +5,17 @@ use domain::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct SearchRentUsecase<R: Repositories> {
+pub struct ScrapeRoomsUsecase<R: Repositories> {
     suumo_repo: R::SuumoRepo,
 }
 
-impl<R: Repositories> SearchRentUsecase<R> {
+impl<R: Repositories> ScrapeRoomsUsecase<R> {
     pub fn new(suumo_repo: R::SuumoRepo) -> Self {
         Self { suumo_repo }
     }
 
     #[tracing::instrument(skip_all, err(Debug))]
-    pub async fn search_rent_suumo(&self, area: TargetArea, station: &str) -> Result<Rooms> {
+    pub async fn scrape_rooms_from_suumo(&self, area: TargetArea, station: &str) -> Result<Rooms> {
         // 前準備
         let crawler = self.suumo_repo.new_crawler().await;
 

@@ -49,7 +49,7 @@ impl Cui {
         tracing::debug!("web_scrape args : {:#?}", args);
         let dto = SuumoRequestDto::new(args.area.to_string(), args.station.clone(), args.dry_run);
 
-        let _res = self.controller.search_rent_suumo(dto).await;
+        let _res = self.controller.scrape_rooms_from_suumo(dto).await;
 
         // 結果表示
         // todo!("DTOを表示する形に修正する")
