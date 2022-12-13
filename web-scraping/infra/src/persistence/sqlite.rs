@@ -1,7 +1,7 @@
 use crate::env::get_env_var;
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqlitePoolOptions},
-    Pool, Sqlite, SqlitePool,
+    Pool, Sqlite,
 };
 use std::sync::Arc;
 
