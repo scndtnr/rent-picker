@@ -10,5 +10,6 @@ pub struct RequestDto {
 pub struct SuumoRequestDto {
     pub area: String,
     pub station: String,
-    pub dry_run: bool,
+    pub save: bool,
+    pub headers_from_database: bool,
 }

@@ -29,17 +29,27 @@ pub(super) struct HealthCheck {
 pub(super) struct WebScrape {
     #[arg(short, long, value_enum, default_value_t=Service::Suumo, help = "対象サービスを指定する")]
     pub(super) service: Service,
+    #[arg(short, long, value_enum, default_value_t=Item::RoomHeaders, help = "取得したい情報を指定する")]
+    pub(super) item: Item,
     #[arg(short, long, value_enum, default_value_t=Area::Tokyo, help = "検索対象エリアを指定する")]
     pub(super) area: Area,
     #[arg(help = "最寄り駅を指定する")]
     pub(super) station: String,
-    #[arg(long, help = "仮実行にするboolフラグ")]
-    pub(super) dry_run: bool,
+    #[arg(long, help = "取得データをデータベースに保存するboolフラグ")]
+    pub(super) save: bool,
+    #[arg(long, help = "ヘッダ情報はデータベースから読む出すboolフラグ")]
+    pub(super) headers_from_database: bool,
 }
 
 #[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) enum Service {
     Suumo,
+}
+
+#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) enum Item {
+    Rooms,
+    RoomHeaders,
 }
 
 #[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]

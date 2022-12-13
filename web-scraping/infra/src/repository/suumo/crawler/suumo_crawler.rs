@@ -4,7 +4,7 @@ use crate::{
     repository::{crawler::HttpClient, HtmlParser},
 };
 use anyhow::{bail, Context, Result};
-use domain::model::{Jst, Room, RoomHeader, Rooms, TargetArea};
+use domain::model::{Jst, RoomHeader, RoomHeaders, Rooms, TargetArea};
 use reqwest::Url;
 
 #[async_trait::async_trait]
@@ -48,15 +48,20 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
         let url = get_env_var("URL_SUUMO_KANTO_EKI_CHECK").unwrap();
         let res = self.client().get(url).query(&query).send().await?;
         let room_list_url = res.url().as_str();
-        tracing::info!("{:#?}", room_list_url);
         Url::parse(room_list_url).context("Fail to Parse URL.")
     }
 
     // 最後のページ番号を確認し、各ページのURLを生成する
     #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
-    async fn urls_of_room_list(&self, url: &Url) -> Result<Vec<Url>> {
+    async fn urls_of_room_list(&self, url: &mut Url) -> Result<Vec<Url>> {
+        // scheme を https から http に変更する
+        // [Error: IncompleteMessage: connection closed before message completed · Issue #2136 · hyperium/hyper](https://github.com/hyperium/hyper/issues/2136)
+        url.set_scheme("http")
+            .expect("Fail to change scheme from 'https' to 'http'");
+
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
+        self.sleep_by_secs(1).await;
 
         // ページネーションのパーツから最後のページ番号を取得する
         let html = res.text().await?;
@@ -89,19 +94,20 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
-    async fn rooms_in_list_page(
+    async fn room_headers_in_list_page(
         &self,
         url: &Url,
         area: TargetArea,
         station: &str,
-    ) -> Result<Rooms> {
+    ) -> Result<RoomHeaders> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
+        self.sleep_by_secs(1).await;
 
         // 住居情報を取得する
         let url_domain = format!("{}://{}", url.scheme(), url.domain().unwrap());
         let text = res.text().await?;
-        let rooms: Rooms = {
+        let room_headers: RoomHeaders = {
             let html = self.parse_html(&text);
             self.find_elements(&html, self.residence_root())
                 .into_iter()
@@ -113,7 +119,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
                         self.find_inner_text_by_element(&element, self.residence_transfer(), "\n");
 
                     //  各部屋のURLを取得し、Room構造体のVecに変換する
-                    let rooms: Vec<Room> = self
+                    let room_headers: Vec<RoomHeader> = self
                         .find_elements_by_element(&element, self.room_path())
                         .into_iter()
                         .map(|room| room.value().attr("href").expect("Fail to get room path."))
@@ -129,15 +135,19 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
                                 Jst::now(),
                             )
                         })
-                        .map(|header| header.into())
                         .collect();
-                    rooms
+                    room_headers
                 })
-                .collect::<Vec<Room>>()
+                .collect::<Vec<RoomHeader>>()
                 .into()
         };
-        tracing::info!("{:#?}", rooms);
 
-        Ok(rooms)
+        Ok(room_headers)
+    }
+
+    /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
+    #[tracing::instrument(skip_all, err(Debug))]
+    async fn rooms_in_detail_page(&self, headers: RoomHeaders) -> Result<Rooms> {
+        todo!();
     }
 }

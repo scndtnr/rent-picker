@@ -1,6 +1,6 @@
 mod options;
 
-use self::options::{Options, Service, Task, WebScrape};
+use self::options::{Item, Options, Service, Task, WebScrape};
 use adapter::{dto::SuumoRequestDto, Controller};
 use clap::Parser;
 use infra::{persistence::sqlite::SqliteDb, RepositoryImpls, UsecaseImpls};
@@ -30,7 +30,10 @@ impl Cui {
                 Service::Suumo => self.process_health_check_suumo().await,
             },
             Task::WebScrape(args) => match args.service {
-                Service::Suumo => self.process_web_scrape_suumo(args).await,
+                Service::Suumo => match args.item {
+                    Item::Rooms => self.process_scrape_suumo_rooms(args).await,
+                    Item::RoomHeaders => self.process_scrape_suumo_room_headers(args).await,
+                },
             },
         }
     }
@@ -45,11 +48,33 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_web_scrape_suumo(&self, args: &WebScrape) {
+    async fn process_scrape_suumo_rooms(&self, args: &WebScrape) {
         tracing::debug!("web_scrape args : {:#?}", args);
-        let dto = SuumoRequestDto::new(args.area.to_string(), args.station.clone(), args.dry_run);
+        let dto = SuumoRequestDto::new(
+            args.area.to_string(),
+            args.station.clone(),
+            args.save,
+            args.headers_from_database,
+        );
 
         let _res = self.controller.scrape_rooms_from_suumo(dto).await;
+
+        // 結果表示
+        // todo!("DTOを表示する形に修正する")
+        // tracing::info!("{:#?}", res);
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn process_scrape_suumo_room_headers(&self, args: &WebScrape) {
+        tracing::debug!("web_scrape args : {:#?}", args);
+        let dto = SuumoRequestDto::new(
+            args.area.to_string(),
+            args.station.clone(),
+            args.save,
+            args.headers_from_database,
+        );
+
+        let _res = self.controller.scrape_room_headers_from_suumo(dto).await;
 
         // 結果表示
         // todo!("DTOを表示する形に修正する")
