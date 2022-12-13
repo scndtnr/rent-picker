@@ -1,6 +1,6 @@
 use derive_new::new;
 
-use super::{ResidenceHeader, Rooms, TargetArea};
+use super::{ResidenceHeader, Rooms};
 
 #[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Residence {
@@ -9,17 +9,8 @@ pub struct Residence {
 }
 
 impl Residence {
-    pub fn name(&self) -> &str {
-        self.header.name()
-    }
-    pub fn transfer(&self) -> &str {
-        self.header.transfer()
-    }
-    pub fn area(&self) -> &TargetArea {
-        self.header.area()
-    }
-    pub fn station(&self) -> &str {
-        self.header.station()
+    pub fn header(&self) -> &ResidenceHeader {
+        &self.header
     }
     pub fn rooms(&self) -> &Rooms {
         &self.rooms
