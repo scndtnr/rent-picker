@@ -48,7 +48,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
         station: &str,
     ) -> Result<Residences> {
         // 検索条件を選択し、賃貸一覧ページの1ページ目のURLを取得する
-        let url = crawler.url_of_room_list(area, station).await?;
+        let url = crawler.url_of_room_list(area.clone(), station).await?;
 
         // 最後のページ番号を確認し、各ページのURLを生成する
         let urls = crawler.urls_of_room_list(&url).await?;
@@ -63,8 +63,9 @@ impl SuumoRepository for SuumoRepositoryImpl {
             urls[0..max_page].to_vec()
         };
         let residences_vec: Vec<Residences> = stream::iter(urls)
-            .map(|url| async move {
-                let residences = match crawler.residences_in_list_page(&url).await {
+            .map(|url| (url, area.clone(), station.to_string()))
+            .map(|(url, area, station)| async move {
+                let residences = match crawler.residences_in_list_page(&url, area, &station).await {
                     Ok(residences) => residences,
                     Err(e) => bail!("Fail to parse residence infomation. {:#?}", e),
                 };

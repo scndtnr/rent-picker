@@ -4,7 +4,7 @@ use crate::{
     repository::{crawler::HttpClient, HtmlParser},
 };
 use anyhow::{bail, Context, Result};
-use domain::model::{Residence, Residences, Room, TargetArea};
+use domain::model::{Residence, ResidenceHeader, Residences, Room, TargetArea};
 use reqwest::Url;
 
 #[async_trait::async_trait]
@@ -89,7 +89,12 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
-    async fn residences_in_list_page(&self, url: &Url) -> Result<Residences> {
+    async fn residences_in_list_page(
+        &self,
+        url: &Url,
+        area: TargetArea,
+        station: &str,
+    ) -> Result<Residences> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
 
@@ -112,7 +117,10 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
                         .map(|path| format!("{}{}", &url_domain, path))
                         .map(|url| url.into())
                         .collect::<Vec<Room>>();
-                    Residence::new(name, transfer, rooms.into())
+                    Residence::new(
+                        ResidenceHeader::new(name, transfer, area.clone(), station.to_string()),
+                        rooms.into(),
+                    )
                 })
                 .collect::<Vec<Residence>>()
         };
