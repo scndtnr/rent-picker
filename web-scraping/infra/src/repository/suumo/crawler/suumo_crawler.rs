@@ -1,11 +1,9 @@
 use super::{selector::SuumoSelector, SearchQueryParams, SortType, Transfers};
-use crate::{
-    env::get_env_var,
-    repository::{crawler::HttpClient, HtmlParser},
-};
+use crate::repository::{crawler::HttpClient, HtmlParser};
 use anyhow::{bail, Context, Result};
 use domain::model::{Jst, RoomHeader, RoomHeaders, Rooms, TargetArea};
 use reqwest::Url;
+use usecase::env::get_env_var;
 
 #[async_trait::async_trait]
 pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
@@ -98,7 +96,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
     async fn room_headers_in_list_page(
         &self,
         url: &Url,
-        area: TargetArea,
+        area: &TargetArea,
         station: &str,
     ) -> Result<RoomHeaders> {
         // 賃貸一覧ページに遷移する

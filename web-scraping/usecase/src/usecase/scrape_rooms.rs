@@ -38,7 +38,7 @@ impl<R: Repositories> ScrapeRoomsUsecase<R> {
         } else {
             // Webサイトから取得する
             self.suumo_repo
-                .room_headers_by_area_and_station(&crawler, area, station)
+                .room_headers_by_area_and_station(&crawler, &area, station)
                 .await?
         };
         tracing::info!("{:#?}", room_headers.len());

@@ -56,7 +56,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     /// データを1件ずつinsertする。
     /// is_load_table = true の場合、作業用ロードテーブルにinsertする
-    #[tracing::instrument(skip_all, fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
+    #[tracing::instrument(skip_all, level = "trace", fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
     async fn insert(&self, source: &RoomHeader, is_load_table: bool) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
@@ -86,6 +86,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     /// 複数のデータを1件ずつinsertする。
     /// is_load_table = true の場合、作業用ロードテーブルにinsertする
+    #[tracing::instrument(skip_all, fields(len=source.len(),is_load_table=is_load_table), err(Debug))]
     async fn insert_many(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let result: Result<()> = stream::iter(source.clone().into_inner())
@@ -97,7 +98,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    #[tracing::instrument(skip_all, fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
+    #[tracing::instrument(skip_all, level = "trace", fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
     async fn delete_by_pk(&self, source: &RoomHeader, is_load_table: bool) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
@@ -117,6 +118,8 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         let _ = sqlx::query(&sql).bind(dto.url).execute(pool).await?;
         Ok(())
     }
+
+    #[tracing::instrument(skip_all, fields(len=source.len(), is_load_table=is_load_table), err(Debug))]
     async fn delete_many_by_pk(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let result: Result<()> = stream::iter(source.clone().into_inner())
