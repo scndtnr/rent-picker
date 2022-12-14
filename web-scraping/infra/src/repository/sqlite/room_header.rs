@@ -27,7 +27,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     /// 作業用ロードテーブルからPKで集約したデータを取り出す
     #[tracing::instrument(skip_all, err(Debug))]
     async fn group_by_pk_from_load_table(&self) -> Result<RoomHeaders> {
-        let pool = self.pool_clone();
+        let pool = self.reader_pool();
         let sql = "
             SELECT 
                 url,
@@ -42,7 +42,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
                 url
         ";
         let headers_dto = sqlx::query_as::<_, RoomHeaderTable>(sql)
-            .fetch_all(&*pool)
+            .fetch_all(pool)
             .await?;
 
         let headers: RoomHeaders = headers_dto
@@ -57,7 +57,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     /// is_load_table = true の場合、作業用ロードテーブルにinsertする
     #[tracing::instrument(skip_all, fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
     async fn insert(&self, source: &RoomHeader, is_load_table: bool) -> Result<()> {
-        let pool = self.pool_clone();
+        let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
         let table = if is_load_table {
             "load_room_header"
@@ -78,7 +78,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .bind(dto.residence_area)
             .bind(dto.residence_station)
             .bind(dto.created_at)
-            .execute(&*pool)
+            .execute(pool)
             .await?;
         Ok(())
     }
@@ -98,7 +98,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     #[tracing::instrument(skip_all, fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
     async fn delete_by_pk(&self, source: &RoomHeader, is_load_table: bool) -> Result<()> {
-        let pool = self.pool_clone();
+        let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
         let table = if is_load_table {
             "load_room_header"
@@ -113,7 +113,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         ",
             table
         );
-        let _ = sqlx::query(&sql).bind(dto.url).execute(&*pool).await?;
+        let _ = sqlx::query(&sql).bind(dto.url).execute(pool).await?;
         Ok(())
     }
     async fn delete_many_by_pk(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
