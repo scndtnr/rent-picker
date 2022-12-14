@@ -1,6 +1,6 @@
 use crate::model::RoomHeaderTable;
 use futures::{stream, StreamExt, TryStreamExt};
-use usecase::env::get_env_var;
+use usecase::env::get_usize_of_env_var;
 
 use super::repository_impl::SqliteRepositoryImpl;
 use anyhow::Result;
@@ -87,7 +87,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     /// 複数のデータを1件ずつinsertする。
     /// is_load_table = true の場合、作業用ロードテーブルにinsertする
     async fn insert_many(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
-        let buffered_n = get_env_var("MAX_CONCURRENCY").unwrap().parse().unwrap();
+        let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let result: Result<()> = stream::iter(source.clone().into_inner())
             .map(|header| async move { self.insert(&header, is_load_table).await })
             .buffer_unordered(buffered_n)
@@ -118,7 +118,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
     async fn delete_many_by_pk(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
-        let buffered_n = get_env_var("MAX_CONCURRENCY").unwrap().parse().unwrap();
+        let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let result: Result<()> = stream::iter(source.clone().into_inner())
             .map(|header| async move { self.delete_by_pk(&header, is_load_table).await })
             .buffer_unordered(buffered_n)
