@@ -30,17 +30,27 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     async fn group_by_pk_from_load_table(&self) -> Result<RoomHeaders> {
         let pool = self.reader_pool();
         let sql = "
-            SELECT 
-                url,
-                max(residence_title) as residence_title,
-                max(residence_transfer) as residence_transfer ,
-                max(residence_area) as residence_area ,
-                max(residence_station) as residence_station ,
-                max(created_at) as created_at 
-            FROM 
-                load_room_header lrh 
-            GROUP BY
-                url
+            WITH group_by_url AS (
+                SELECT
+                    url,
+                    max(created_at) max_created_at
+                FROM
+                    load_room_header
+                GROUP BY
+                    url
+            )
+            SELECT
+                lrh.url,
+                lrh.residence_title,
+                lrh.residence_transfer,
+                lrh.residence_area,
+                lrh.residence_station,
+                lrh.created_at
+            FROM
+                load_room_header lrh
+                JOIN group_by_url g
+                    ON lrh.url = g.url
+                    AND lrh.created_at = g.max_created_at
         ";
         let headers_dto = sqlx::query_as::<_, RoomHeaderTable>(sql)
             .fetch_all(pool)
