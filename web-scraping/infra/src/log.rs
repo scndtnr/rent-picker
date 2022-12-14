@@ -6,7 +6,7 @@ use tracing_subscriber::{
     filter::Targets, fmt::MakeWriter, layer::SubscriberExt, util::SubscriberInitExt,
 };
 
-use crate::env::{get_bool_of_env_var, get_env_var};
+use usecase::env::{get_bool_of_env_var, get_env_var};
 
 /// CUI実行時に tracing の設定をする関数
 pub fn init_cui_log(log_name: &str) {

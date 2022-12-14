@@ -1,9 +1,9 @@
-use crate::env::get_env_var;
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqlitePoolOptions},
     Pool, Sqlite,
 };
 use std::sync::Arc;
+use usecase::env::get_env_var;
 
 #[derive(Clone, Debug)]
 pub struct SqliteDb {
