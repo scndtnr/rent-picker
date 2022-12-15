@@ -13,7 +13,8 @@ pub trait RoomHeaderRepository {
     async fn find_all(&self) -> Result<RoomHeaders>;
     async fn select_group_by_pk_from_temp_table(&self) -> Result<RoomHeaders>;
     async fn insert(&self, source: &RoomHeader, table: TableType) -> Result<()>;
-    async fn insert_many(&self, source: &RoomHeaders, table: TableType) -> Result<()>;
+    async fn insert_many_one_by_one(&self, source: &RoomHeaders, table: TableType) -> Result<()>;
+    async fn insert_many_multi(&self, source: &RoomHeaders, table: TableType) -> Result<()>;
     async fn insert_to_load_from_temp_all(&self) -> Result<()>;
     async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()>;
     async fn delete_all(&self, table: TableType) -> Result<()>;

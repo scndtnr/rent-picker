@@ -69,34 +69,45 @@ impl RoomHeaderSql {
     }
 
     /// room_header 系テーブルへの insert文
-    pub fn insert_all_column(&self, table: TableType) -> String {
+    pub fn insert_all_header(&self, table: TableType) -> String {
         let table = self.table_name(&table);
         format!(
             "
-            INSERT INTO {}
-                (
-                    url
-                    ,residence_title
-                    ,residence_address
-                    ,residence_nearest_station
-                    ,residence_age
-                    ,residence_floors
-                    ,residence_transfer
-                    ,residence_area
-                    ,residence_station
-                    ,room_floor
-                    ,room_rent_price
-                    ,room_condo_fee
-                    ,room_deposit
-                    ,room_key_money
-                    ,room_layout
-                    ,room_exclusive_area
-                    ,created_at
-                )
+        INSERT INTO {}
+            (
+                url
+                ,residence_title
+                ,residence_address
+                ,residence_nearest_station
+                ,residence_age
+                ,residence_floors
+                ,residence_transfer
+                ,residence_area
+                ,residence_station
+                ,room_floor
+                ,room_rent_price
+                ,room_condo_fee
+                ,room_deposit
+                ,room_key_money
+                ,room_layout
+                ,room_exclusive_area
+                ,created_at
+            )
+    ",
+            table
+        )
+    }
+
+    /// room_header 系テーブルへの insert文
+    pub fn insert_all_column(&self, table: TableType) -> String {
+        let insert_header = self.insert_all_header(table);
+        format!(
+            "
+            {}
             VALUES
                 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ",
-            table
+            insert_header
         )
     }
 
