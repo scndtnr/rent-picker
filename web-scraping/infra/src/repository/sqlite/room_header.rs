@@ -1,4 +1,6 @@
-use crate::model::RoomHeaderTable;
+use std::sync::Arc;
+
+use crate::{model::RoomHeaderTable, progress_bar::new_progress_bar};
 use futures::{stream, StreamExt, TryStreamExt};
 use usecase::env::get_usize_of_env_var;
 
@@ -98,13 +100,27 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     /// is_load_table = true の場合、作業用ロードテーブルにinsertする
     #[tracing::instrument(skip_all, fields(len=source.len(),is_load_table=is_load_table), err(Debug))]
     async fn insert_many(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
+        // プログレスバーの準備
+        let pb_records = new_progress_bar(source.len() as u64).await;
+        let target_table = if is_load_table {
+            "Load Table"
+        } else {
+            "Main Table"
+        };
+        pb_records.set_message(format!("Insert to {}...", target_table));
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let result: Result<()> = stream::iter(source.clone().into_inner())
-            .map(|header| async move { self.insert(&header, is_load_table).await })
+            .map(|header| (header, Arc::clone(&pb_records)))
+            .map(|(header, pb_records)| async move {
+                self.insert(&header, is_load_table).await?;
+                pb_records.inc(1);
+                Ok(())
+            })
             .buffer_unordered(buffered_n)
             .try_collect()
             .await;
         result?;
+        pb_records.finish_with_message(format!("Finish Insert to {}", target_table));
         Ok(())
     }
 
@@ -131,13 +147,30 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     #[tracing::instrument(skip_all, fields(len=source.len(), is_load_table=is_load_table), err(Debug))]
     async fn delete_many_by_pk(&self, source: &RoomHeaders, is_load_table: bool) -> Result<()> {
+        // プログレスバーの準備
+        let pb_records = new_progress_bar(source.len() as u64).await;
+        let target_table = if is_load_table {
+            "Load Table"
+        } else {
+            "Main Table"
+        };
+        pb_records.set_message(format!("Delete target record from {}...", target_table));
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let result: Result<()> = stream::iter(source.clone().into_inner())
-            .map(|header| async move { self.delete_by_pk(&header, is_load_table).await })
+            .map(|header| (header, Arc::clone(&pb_records)))
+            .map(|(header, pb_records)| async move {
+                self.delete_by_pk(&header, is_load_table).await?;
+                pb_records.inc(1);
+                Ok(())
+            })
             .buffer_unordered(buffered_n)
             .try_collect()
             .await;
         result?;
+        pb_records.finish_with_message(format!(
+            "Finished Deleting target record from {}",
+            target_table
+        ));
         Ok(())
     }
 }

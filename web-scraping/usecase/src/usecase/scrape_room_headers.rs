@@ -30,8 +30,8 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
         station: &str,
         save: bool,
     ) -> Result<RoomHeaders> {
-        // let room_headers = self.room_headers_one_shot(&area, station, save).await?;
-        let room_headers = self.room_headers_step_by_step(&area, station, save).await?;
+        let room_headers = self.room_headers_one_shot(&area, station, save).await?;
+        // let room_headers = self.room_headers_step_by_step(&area, station, save).await?;
 
         tracing::info!("{:#?}", room_headers.len());
 

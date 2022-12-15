@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use domain::{
     model::{AsVec, RoomHeader, RoomHeaders, Rooms, TargetArea},
     repository::SuumoRepository,
@@ -8,7 +8,7 @@ use domain::{
 use futures::{stream, StreamExt, TryStreamExt};
 use reqwest::Url;
 
-use crate::repository::ReqwestCrawler;
+use crate::{progress_bar::new_progress_bar, repository::ReqwestCrawler};
 use usecase::env::get_usize_of_env_var;
 
 use super::SuumoCrawler;
@@ -100,17 +100,23 @@ impl SuumoRepository for SuumoRepositoryImpl {
         } else {
             urls[0..max_page].to_vec()
         };
+
+        // プログレスバーの準備
+        let pb_urls = new_progress_bar(urls.len() as u64).await;
+        pb_urls.set_message("Web Scraping in list page...".to_string());
+
         let room_headers_vec: Vec<RoomHeaders> = stream::iter(urls)
-            .map(|url| (url, area.clone(), station.to_string()))
-            .map(|(url, area, station)| async move {
-                let room_headers = match crawler
+            .map(|url| (url, area.clone(), station.to_string(), Arc::clone(&pb_urls)))
+            .map(|(url, area, station, pb_urls)| async move {
+                // 対象ページのスクレイピングをする
+                let room_headers = crawler
                     .room_headers_in_list_page(&url, &area, &station)
                     .await
-                {
-                    Ok(room_headers) => room_headers,
-                    Err(e) => bail!("Fail to parse room headers infomation. {:#?}", e),
-                };
-                Ok(room_headers)
+                    .context("Fail to parse room headers infomation.")?;
+                // プログレスバーをインクリメントする
+                pb_urls.inc(1);
+
+                anyhow::Ok(room_headers)
             })
             .buffer_unordered(buffered_n)
             .try_collect()
@@ -120,6 +126,9 @@ impl SuumoRepository for SuumoRepositoryImpl {
             .flat_map(|room_headers| room_headers.into_inner())
             .collect::<Vec<RoomHeader>>()
             .into();
+
+        pb_urls.finish_with_message("Finish web scraping in list page.");
+
         Ok(room_headers)
     }
 
