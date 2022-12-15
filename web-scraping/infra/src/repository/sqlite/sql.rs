@@ -100,16 +100,33 @@ impl RoomHeaderSql {
         )
     }
 
-    /// room_header 系テーブルからテーブルへの insert文
-    pub fn insert_all_from_table_to_table(&self, from: TableType, to: TableType) -> String {
-        let from = self.table_name(&from);
-        let to = self.table_name(&to);
+    /// room_header 系テーブルからテーブルへの全件 insert文
+    pub fn insert_from_other_table_all(&self, table: TableType, other: TableType) -> String {
+        let table = self.table_name(&table);
+        let other = self.table_name(&other);
         format!(
             "
                 INSERT INTO {}
                 SELECT * FROM {}
             ",
-            to, from
+            table, other
+        )
+    }
+
+    /// room_header 系テーブルからテーブルへの全件 insert文
+    pub fn insert_from_other_table_group_by_pk(
+        &self,
+        table: TableType,
+        other: TableType,
+    ) -> String {
+        let group_by_pk_from_other = self.select_group_by_pk(other);
+        let table = self.table_name(&table);
+        format!(
+            "
+                INSERT INTO {}
+                SELECT other.* FROM ({}) other
+            ",
+            table, group_by_pk_from_other
         )
     }
 

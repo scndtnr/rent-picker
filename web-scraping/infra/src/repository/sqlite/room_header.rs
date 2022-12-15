@@ -101,11 +101,22 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     /// tempテーブルからloadテーブルに全件insertする
     #[tracing::instrument(level = "trace", skip_all, err(Debug))]
-    async fn insert_from_temp_to_load(&self) -> Result<()> {
+    async fn insert_to_load_from_temp_all(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = Sql::new()
             .room_header
-            .insert_all_from_table_to_table(TableType::Temp, TableType::Load);
+            .insert_from_other_table_all(TableType::Load, TableType::Temp);
+        let _ = sqlx::query(&sql).execute(pool).await?;
+        Ok(())
+    }
+
+    /// tempテーブルからloadテーブルに全件insertする
+    #[tracing::instrument(level = "trace", skip_all, err(Debug))]
+    async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()> {
+        let pool = self.writer_pool();
+        let sql = Sql::new()
+            .room_header
+            .insert_from_other_table_group_by_pk(TableType::Main, TableType::Temp);
         let _ = sqlx::query(&sql).execute(pool).await?;
         Ok(())
     }
@@ -159,7 +170,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     #[tracing::instrument(skip_all, err(Debug))]
-    async fn delete_main_record_by_temp_record_pk(&self) -> Result<()> {
+    async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = Sql::new()
             .room_header

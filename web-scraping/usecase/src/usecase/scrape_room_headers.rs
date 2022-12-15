@@ -62,25 +62,19 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
     #[tracing::instrument(skip(self), err(Debug))]
     async fn save_room_headers_to_load_table(&self) -> Result<()> {
         // 作業用一時テーブルから累積テーブルにデータを入れ込む
-        self.room_header_repo.insert_from_temp_to_load().await
+        self.room_header_repo.insert_to_load_from_temp_all().await
     }
 
     #[tracing::instrument(skip_all, err(Debug))]
     async fn save_room_headers_to_main_table(&self) -> Result<()> {
-        // 作業用ロードテーブルからPKで集約したデータを取り出す
-        let room_header_group_by_pk = self
-            .room_header_repo
-            .select_group_by_pk_from_temp_table()
-            .await?;
-
         // 集約データとPKが一致するレコードを本テーブルから削除する
         self.room_header_repo
-            .delete_main_record_by_temp_record_pk()
+            .delete_from_main_by_temp_record_pk()
             .await?;
 
         // 集約データを本テーブルに入れ込む
         self.room_header_repo
-            .insert_many(&room_header_group_by_pk, TableType::Main)
+            .insert_to_main_from_temp_group_by_pk()
             .await
     }
 }
