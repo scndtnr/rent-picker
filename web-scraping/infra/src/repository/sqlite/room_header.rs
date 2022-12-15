@@ -4,7 +4,7 @@ use crate::{model::RoomHeaderTable, progress_bar::new_progress_bar};
 use futures::{stream, StreamExt, TryStreamExt};
 use usecase::env::get_usize_of_env_var;
 
-use super::repository_impl::SqliteRepositoryImpl;
+use super::{repository_impl::SqliteRepositoryImpl, Sql};
 use anyhow::Result;
 use domain::{
     model::{AsVec, RoomHeader, RoomHeaders, TargetArea},
@@ -28,30 +28,8 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(skip_all, err(Debug))]
     async fn group_by_pk_from_load_table(&self) -> Result<RoomHeaders> {
         let pool = self.reader_pool();
-        let sql = "
-            WITH group_by_url AS (
-                SELECT
-                    url,
-                    max(created_at) max_created_at
-                FROM
-                    load_room_header
-                GROUP BY
-                    url
-            )
-            SELECT
-                lrh.url,
-                lrh.residence_title,
-                lrh.residence_transfer,
-                lrh.residence_area,
-                lrh.residence_station,
-                lrh.created_at
-            FROM
-                load_room_header lrh
-                JOIN group_by_url g
-                    ON lrh.url = g.url
-                    AND lrh.created_at = g.max_created_at
-        ";
-        let headers_dto = sqlx::query_as::<_, RoomHeaderTable>(sql)
+        let sql = Sql::new().room_header.group_by_pk_from_load_table();
+        let headers_dto = sqlx::query_as::<_, RoomHeaderTable>(&sql)
             .fetch_all(pool)
             .await?;
 
@@ -74,13 +52,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         } else {
             "room_header"
         };
-        let sql = format!("
-            INSERT INTO
-                {}
-                    (url, residence_title, residence_transfer, residence_area, residence_station, created_at)
-                VALUES
-                    (?, ?, ?, ?, ?, ?)
-        ", table);
+        let sql = Sql::new().room_header.insert_all_column(table);
         let _ = sqlx::query(&sql)
             .bind(dto.url)
             .bind(dto.residence_title)
