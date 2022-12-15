@@ -52,11 +52,6 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
     // 最後のページ番号を確認し、各ページのURLを生成する
     #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
     async fn urls_of_room_list(&self, url: &mut Url) -> Result<Vec<Url>> {
-        // scheme を https から http に変更する
-        // [Error: IncompleteMessage: connection closed before message completed · Issue #2136 · hyperium/hyper](https://github.com/hyperium/hyper/issues/2136)
-        url.set_scheme("http")
-            .expect("Fail to change scheme from 'https' to 'http'");
-
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
         self.sleep_by_secs(1).await;

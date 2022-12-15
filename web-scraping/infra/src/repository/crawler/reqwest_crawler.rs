@@ -14,7 +14,11 @@ impl Default for ReqwestCrawler {
 impl ReqwestCrawler {
     pub fn new() -> Self {
         Self {
-            client: Client::new(),
+            client: Client::builder()
+                // [Error: IncompleteMessage: connection closed before message completed · Issue #2136 · hyperium/hyper](https://github.com/hyperium/hyper/issues/2136)
+                .pool_max_idle_per_host(0)
+                .build()
+                .expect("Fail to build reqwest client."),
         }
     }
 
