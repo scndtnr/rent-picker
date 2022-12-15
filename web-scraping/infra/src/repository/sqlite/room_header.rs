@@ -13,9 +13,6 @@ use domain::{
 
 #[async_trait::async_trait]
 impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
-    async fn find_by_url(&self, url: &str) -> Result<RoomHeaders> {
-        todo!()
-    }
     async fn find_by_area_and_station(
         &self,
         area: TargetArea,

@@ -5,7 +5,6 @@ use crate::model::{RoomHeader, RoomHeaders, TargetArea};
 #[cfg_attr(feature = "mock", mockall::automock)]
 #[async_trait::async_trait]
 pub trait RoomHeaderRepository {
-    async fn find_by_url(&self, url: &str) -> Result<RoomHeaders>;
     async fn find_by_area_and_station(
         &self,
         area: TargetArea,
