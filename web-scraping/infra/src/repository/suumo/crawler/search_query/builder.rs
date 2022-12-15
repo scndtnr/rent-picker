@@ -2,10 +2,7 @@ use anyhow::{bail, Context, Result};
 use domain::model::TargetArea;
 use serde_derive::{Deserialize, Serialize};
 
-use super::{
-    builder_fields::{SortType, Transfers},
-    SearchQueryParams,
-};
+use super::{builder_fields::Transfers, SearchQueryParams};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct SearchQueryParamsBuilder {
@@ -31,7 +28,6 @@ pub struct SearchQueryParamsBuilder {
     hidden_周辺環境3: String,
     hidden_周辺環境4: String,
     hidden_テキストボックス: String,
-    並び替え: SortType,
 }
 
 impl Default for SearchQueryParamsBuilder {
@@ -59,7 +55,6 @@ impl Default for SearchQueryParamsBuilder {
             hidden_周辺環境3: "03".to_string(),
             hidden_周辺環境4: "03".to_string(),
             hidden_テキストボックス: "".to_string(),
-            並び替え: SortType::新着順,
         }
     }
 }
@@ -120,12 +115,6 @@ impl SearchQueryParamsBuilder {
         self
     }
 
-    /// default: SortType::新着順
-    pub fn 並び替え(mut self, sort_type: SortType) -> Self {
-        self.並び替え = sort_type;
-        self
-    }
-
     pub fn build(self) -> Result<SearchQueryParams> {
         Ok(SearchQueryParams::new(
             self.hidden_検索フォーム_ar,
@@ -168,7 +157,6 @@ impl SearchQueryParamsBuilder {
             self.hidden_周辺環境3,
             self.hidden_周辺環境4,
             self.hidden_テキストボックス,
-            self.並び替え.to_string(),
         ))
     }
 }
