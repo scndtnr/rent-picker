@@ -40,7 +40,6 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
             .鉄筋系(true)
             .鉄骨系(true)
             .バストイレ別(true)
-            .並び替え(SortType::新着順)
             .build()?;
 
         // ルーム一覧画面のURLを取得する
@@ -82,8 +81,14 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
         let urls: Result<Vec<Url>> = (1..=max_page_number)
             .into_iter()
             .map(|page| {
-                Url::parse_with_params(url.as_str(), &[("page", page.to_string())])
-                    .context("Fail to convert from page number to url.")
+                Url::parse_with_params(
+                    url.as_str(),
+                    &[
+                        ("page", page.to_string()),
+                        ("po1", SortType::新着順.to_string()),
+                    ],
+                )
+                .context("Fail to convert from page number to url.")
             })
             .collect();
 
