@@ -85,6 +85,11 @@ pub trait HtmlParser {
     }
 
     fn inner_text(&self, element: &ElementRef, sep: &str) -> String {
-        element.text().collect::<Vec<&str>>().join(sep)
+        element
+            .text()
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<&str>>()
+            .join(sep)
     }
 }

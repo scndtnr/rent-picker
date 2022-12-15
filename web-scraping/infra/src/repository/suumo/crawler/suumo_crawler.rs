@@ -118,24 +118,73 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
                 .flat_map(|element| {
                     // 住居情報を取得する
                     let residence_title =
-                        self.find_inner_text_by_element(&element, self.residence_name(), ",");
+                        self.find_inner_text_by_element(&element, self.residence_title(), ",");
+                    let residence_address =
+                        self.find_inner_text_by_element(&element, self.residence_address(), "\n");
+                    let residence_nearest_station = self.find_inner_text_by_element(
+                        &element,
+                        self.residence_nearest_station(),
+                        "\n",
+                    );
+                    let residence_age =
+                        self.find_inner_text_by_element(&element, self.residence_age(), "\n");
+                    let residence_floors =
+                        self.find_inner_text_by_element(&element, self.residence_floors(), "\n");
                     let residence_transfer =
                         self.find_inner_text_by_element(&element, self.residence_transfer(), "\n");
 
                     //  各部屋のURLを取得し、Room構造体のVecに変換する
                     let room_headers: Vec<RoomHeader> = self
-                        .find_elements_by_element(&element, self.room_path())
+                        .find_elements_by_element(&element, self.rooms())
                         .into_iter()
-                        .map(|room| room.value().attr("href").expect("Fail to get room path."))
-                        .map(|path| format!("{}{}", &url_domain, path))
-                        .into_iter()
-                        .map(|url| {
+                        .map(|room| {
+                            let url = format!(
+                                "{}{}",
+                                &url_domain,
+                                self.find_element_by_element(&room, self.room_path())
+                                    .unwrap()
+                                    .value()
+                                    .attr("href")
+                                    .expect("Fail to get room path.")
+                            );
+                            let room_floor =
+                                self.find_inner_text_by_element(&room, self.room_floor(), "\n");
+                            let room_rent_price = self.find_inner_text_by_element(
+                                &room,
+                                self.room_rent_price(),
+                                "\n",
+                            );
+                            let room_condo_fee =
+                                self.find_inner_text_by_element(&room, self.room_condo_fee(), "\n");
+                            let room_deposit =
+                                self.find_inner_text_by_element(&room, self.room_deposit(), "\n");
+                            let room_key_money =
+                                self.find_inner_text_by_element(&room, self.room_key_money(), "\n");
+                            let room_layout =
+                                self.find_inner_text_by_element(&room, self.room_layout(), "\n");
+                            let room_exclusive_area = self.find_inner_text_by_element(
+                                &room,
+                                self.room_exclusive_area(),
+                                "^",
+                            );
+
                             RoomHeader::new(
                                 url,
                                 residence_title.clone(),
+                                residence_address.clone(),
+                                residence_nearest_station.clone(),
+                                residence_age.clone(),
+                                residence_floors.clone(),
                                 residence_transfer.clone(),
                                 area.clone(),
                                 station.to_string(),
+                                room_floor,
+                                room_rent_price,
+                                room_condo_fee,
+                                room_deposit,
+                                room_key_money,
+                                room_layout,
+                                room_exclusive_area,
                                 Jst::now(),
                             )
                         })

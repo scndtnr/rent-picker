@@ -33,12 +33,23 @@ impl RoomHeaderSql {
         format!(
             "
         SELECT
-            t.url,
-            t.residence_title,
-            t.residence_transfer,
-            t.residence_area,
-            t.residence_station,
-            t.created_at
+            t.url
+            ,t.residence_title
+            ,t.residence_address
+            ,t.residence_nearest_station
+            ,t.residence_age
+            ,t.residence_floors
+            ,t.residence_transfer
+            ,t.residence_area
+            ,t.residence_station
+            ,t.room_floor
+            ,t.room_rent_price
+            ,t.room_condo_fee
+            ,t.room_deposit
+            ,t.room_key_money
+            ,t.room_layout
+            ,t.room_exclusive_area
+            ,t.created_at
         FROM
             {} t
             JOIN (
@@ -66,13 +77,24 @@ impl RoomHeaderSql {
                 (
                     url
                     ,residence_title
+                    ,residence_address
+                    ,residence_nearest_station
+                    ,residence_age
+                    ,residence_floors
                     ,residence_transfer
                     ,residence_area
                     ,residence_station
+                    ,room_floor
+                    ,room_rent_price
+                    ,room_condo_fee
+                    ,room_deposit
+                    ,room_key_money
+                    ,room_layout
+                    ,room_exclusive_area
                     ,created_at
                 )
             VALUES
-                (?, ?, ?, ?, ?, ?)
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ",
             table
         )
