@@ -75,7 +75,7 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
 
         // 集約データとPKが一致するレコードを本テーブルから削除する
         self.room_header_repo
-            .delete_many_by_pk(&room_header_group_by_pk, TableType::Main)
+            .delete_main_record_by_temp_record_pk()
             .await?;
 
         // 集約データを本テーブルに入れ込む

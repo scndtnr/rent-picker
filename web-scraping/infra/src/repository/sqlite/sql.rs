@@ -114,4 +114,28 @@ impl RoomHeaderSql {
             table
         )
     }
+
+    /// room_header 系テーブルからPKに合致したレコードを削除する delete文
+    /// PKは他のテーブルから引っ張ってくる
+    pub fn delete_where_group_by_pk_from_other_table(
+        &self,
+        table: TableType,
+        other: TableType,
+    ) -> String {
+        let table = self.table_name(&table);
+        let group_by_pk_from_other = self.select_group_by_pk(other);
+        format!(
+            "
+                DELETE FROM {}
+                WHERE
+                    url in (
+                        SELECT
+                            other.url
+                        FROM
+                            ({}) other
+                    )
+                ",
+            table, group_by_pk_from_other
+        )
+    }
 }

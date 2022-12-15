@@ -18,4 +18,5 @@ pub trait RoomHeaderRepository {
     async fn delete_all(&self, table: TableType) -> Result<()>;
     async fn delete_by_pk(&self, source: &RoomHeader, table: TableType) -> Result<()>;
     async fn delete_many_by_pk(&self, source: &RoomHeaders, table: TableType) -> Result<()>;
+    async fn delete_main_record_by_temp_record_pk(&self) -> Result<()>;
 }

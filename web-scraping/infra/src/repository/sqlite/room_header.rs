@@ -146,4 +146,14 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         // 返り値
         Ok(())
     }
+
+    #[tracing::instrument(skip_all, err(Debug))]
+    async fn delete_main_record_by_temp_record_pk(&self) -> Result<()> {
+        let pool = self.writer_pool();
+        let sql = Sql::new()
+            .room_header
+            .delete_where_group_by_pk_from_other_table(TableType::Main, TableType::Temp);
+        let _ = sqlx::query(&sql).execute(pool).await?;
+        Ok(())
+    }
 }
