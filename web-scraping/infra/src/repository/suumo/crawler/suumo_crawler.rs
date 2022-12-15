@@ -92,7 +92,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
     }
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
-    #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=url.as_str()), err(Debug))]
     async fn room_headers_in_list_page(
         &self,
         url: &Url,

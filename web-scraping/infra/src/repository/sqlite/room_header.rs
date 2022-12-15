@@ -66,7 +66,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     /// データを1件ずつinsertする。
     /// is_load_table = true の場合、作業用ロードテーブルにinsertする
-    #[tracing::instrument(skip_all, level = "trace", fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
     async fn insert(&self, source: &RoomHeader, is_load_table: bool) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
@@ -108,7 +108,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    #[tracing::instrument(skip_all, level = "trace", fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), title=source.residence_title(), is_load_table=is_load_table), err(Debug))]
     async fn delete_by_pk(&self, source: &RoomHeader, is_load_table: bool) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
