@@ -20,3 +20,13 @@ CREATE TABLE load_room_header (
     residence_station VARCHAR, 
     created_at DATETIME
 );
+
+-- DROP TABLE temp_room_header;
+CREATE TABLE temp_room_header (
+    url VARCHAR NOT NULL, 
+    residence_title VARCHAR NOT NULL, 
+    residence_transfer VARCHAR, 
+    residence_area VARCHAR, 
+    residence_station VARCHAR, 
+    created_at DATETIME
+);

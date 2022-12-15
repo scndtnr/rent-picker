@@ -1,4 +1,5 @@
 use derive_new::new;
+use domain::model::TableType;
 
 #[derive(Debug, Clone, Default)]
 pub struct Sql {
@@ -17,36 +18,48 @@ impl Sql {
 pub struct RoomHeaderSql;
 
 impl RoomHeaderSql {
+    /// テーブル名を決定する
+    pub fn table_name<'a>(&self, table: &'a TableType) -> &'a str {
+        match table {
+            TableType::Main => "room_header",
+            TableType::Load => "load_room_header",
+            TableType::Temp => "temp_room_header",
+        }
+    }
+
     /// PK毎に作成日時が最大のレコードを集約する select 文
-    pub fn group_by_pk_from_load_table(&self) -> String {
-        "
-        WITH group_by_url AS (
-            SELECT
-                url,
-                max(created_at) max_created_at
-            FROM
-                load_room_header
-            GROUP BY
-                url
-        )
+    pub fn select_group_by_pk(&self, table: TableType) -> String {
+        let table = self.table_name(&table);
+        format!(
+            "
         SELECT
-            lrh.url,
-            lrh.residence_title,
-            lrh.residence_transfer,
-            lrh.residence_area,
-            lrh.residence_station,
-            lrh.created_at
+            t.url,
+            t.residence_title,
+            t.residence_transfer,
+            t.residence_area,
+            t.residence_station,
+            t.created_at
         FROM
-            load_room_header lrh
-            JOIN group_by_url g
-                ON lrh.url = g.url
-                AND lrh.created_at = g.max_created_at
-        "
-        .to_string()
+            {} t
+            JOIN (
+                SELECT
+                    url,
+                    max(created_at) max_created_at
+                FROM
+                    {}
+                GROUP BY
+                    url
+            ) g
+                ON t.url = g.url
+                AND t.created_at = g.max_created_at
+        ",
+            table, table
+        )
     }
 
     /// room_header 系テーブルへの insert文
-    pub fn insert_all_column(&self, table: &str) -> String {
+    pub fn insert_all_column(&self, table: TableType) -> String {
+        let table = self.table_name(&table);
         format!(
             "
             INSERT INTO {}
@@ -61,6 +74,43 @@ impl RoomHeaderSql {
             VALUES
                 (?, ?, ?, ?, ?, ?)
         ",
+            table
+        )
+    }
+
+    /// room_header 系テーブルからテーブルへの insert文
+    pub fn insert_all_from_table_to_table(&self, from: TableType, to: TableType) -> String {
+        let from = self.table_name(&from);
+        let to = self.table_name(&to);
+        format!(
+            "
+                INSERT INTO {}
+                SELECT * FROM {}
+            ",
+            to, from
+        )
+    }
+
+    /// room_header 系テーブルのデータを全削除する delete文
+    pub fn delete_all(&self, table: TableType) -> String {
+        let table = self.table_name(&table);
+        format!(
+            "
+            DELETE FROM {}
+            ",
+            table
+        )
+    }
+
+    /// room_header 系テーブルからPKに合致したレコードを削除する delete文
+    pub fn delete_by_pk(&self, table: TableType) -> String {
+        let table = self.table_name(&table);
+        format!(
+            "
+            DELETE FROM {}
+            WHERE
+                url = ?
+            ",
             table
         )
     }

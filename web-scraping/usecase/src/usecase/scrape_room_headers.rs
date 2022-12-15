@@ -1,6 +1,6 @@
 use anyhow::Result;
 use domain::{
-    model::{AsVec, RoomHeaders, TargetArea},
+    model::{AsVec, RoomHeaders, TableType, TargetArea},
     repository::{Repositories, RoomHeaderRepository, SuumoRepository},
 };
 
@@ -36,7 +36,8 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
 
         // 賃貸概要をデータベースに保存する
         if save {
-            self.save_room_headers_to_load_table(&room_headers).await?;
+            self.save_room_headers_to_temp_table(&room_headers).await?;
+            self.save_room_headers_to_load_table().await?;
             self.save_room_headers_to_main_table().await?;
         }
 
@@ -46,27 +47,40 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
     }
 
     #[tracing::instrument(skip(self, room_headers), err(Debug))]
-    async fn save_room_headers_to_load_table(&self, room_headers: &RoomHeaders) -> Result<()> {
-        // 作業用ロードテーブルにスクレイピングデータを入れ込む
+    async fn save_room_headers_to_temp_table(&self, room_headers: &RoomHeaders) -> Result<()> {
+        // 作業用一時テーブルのデータを全削除する
+        self.room_header_repo.delete_all(TableType::Temp).await?;
+
+        // 作業用一時テーブルにスクレイピングデータを入れ込む
         self.room_header_repo
-            .insert_many(room_headers, true)
+            .insert_many(room_headers, TableType::Temp)
             .await?;
+
         Ok(())
+    }
+
+    #[tracing::instrument(skip(self), err(Debug))]
+    async fn save_room_headers_to_load_table(&self) -> Result<()> {
+        // 作業用一時テーブルから累積テーブルにデータを入れ込む
+        self.room_header_repo.insert_from_temp_to_load().await
     }
 
     #[tracing::instrument(skip_all, err(Debug))]
     async fn save_room_headers_to_main_table(&self) -> Result<()> {
         // 作業用ロードテーブルからPKで集約したデータを取り出す
-        let room_header_group_by_pk = self.room_header_repo.group_by_pk_from_load_table().await?;
+        let room_header_group_by_pk = self
+            .room_header_repo
+            .select_group_by_pk_from_temp_table()
+            .await?;
 
         // 集約データとPKが一致するレコードを本テーブルから削除する
         self.room_header_repo
-            .delete_many_by_pk(&room_header_group_by_pk, false)
+            .delete_many_by_pk(&room_header_group_by_pk, TableType::Main)
             .await?;
 
         // 集約データを本テーブルに入れ込む
         self.room_header_repo
-            .insert_many(&room_header_group_by_pk, false)
+            .insert_many(&room_header_group_by_pk, TableType::Main)
             .await
     }
 }

@@ -6,6 +6,7 @@ mod room_headers;
 mod room_raw;
 mod room_sanitize;
 mod rooms;
+mod table_type;
 mod target_area;
 
 pub use as_vec::AsVec;
@@ -16,4 +17,5 @@ pub use room_headers::RoomHeaders;
 pub use room_raw::RoomRaw;
 pub use room_sanitize::RoomSanitize;
 pub use rooms::Rooms;
+pub use table_type::TableType;
 pub use target_area::TargetArea;
