@@ -6,7 +6,6 @@ use domain::{
     repository::SuumoRepository,
 };
 use futures::{stream, StreamExt, TryStreamExt};
-use reqwest::Url;
 
 use crate::{progress_bar::new_progress_bar, repository::ReqwestCrawler};
 use usecase::env::get_usize_of_env_var;
@@ -41,41 +40,6 @@ impl SuumoRepository for SuumoRepositoryImpl {
     #[tracing::instrument(skip_all, err(Debug))]
     async fn health_check(&self, crawler: &Self::Crawler) -> Result<()> {
         crawler.health_check().await
-    }
-
-    /// 検索条件を選択し、賃貸一覧ページの1ページ目のURLを取得する
-    async fn url_of_room_list_by_area_and_station(
-        &self,
-        crawler: &Self::Crawler,
-        area: &TargetArea,
-        station: &str,
-    ) -> Result<Url> {
-        // 検索条件を選択し、賃貸一覧ページの1ページ目のURLを取得する
-        crawler.url_of_room_list(area.clone(), station).await
-    }
-
-    /// 賃貸一覧ページの1ページ目のURLから、各ページのURLを生成する
-    async fn urls_of_room_list_by_one_url(
-        &self,
-        crawler: &Self::Crawler,
-        url: &mut Url,
-    ) -> Result<Vec<Url>> {
-        // 最後のページ番号を確認し、各ページのURLを生成する
-        crawler.urls_of_room_list(url).await
-    }
-
-    /// 賃貸一覧ページのURLから、賃貸の概要とURLを取得する
-    async fn room_headers_by_url(
-        &self,
-        crawler: Arc<Self::Crawler>,
-        url: Url,
-        area: TargetArea,
-        station: String,
-    ) -> Result<RoomHeaders> {
-        crawler
-            .room_headers_in_list_page(&url, &area, &station)
-            .await
-            .context("Fail to parse room headers infomation.")
     }
 
     /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
