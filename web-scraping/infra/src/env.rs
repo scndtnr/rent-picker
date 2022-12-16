@@ -1,6 +1,35 @@
+// dotenvの読み込みが必要かどうか確認する
+fn is_required_set_dotenv() -> bool {
+    match std::env::var("IS_LOCAL").ok() {
+        Some(s) if s.to_uppercase() == "TRUE" => {
+            println!(
+                "Env 'IS_LOCAL' is '{}'. Continue  set_dotenv.",
+                s.to_uppercase()
+            );
+            true
+        }
+        Some(s) => {
+            println!(
+                "Env 'IS_LOCAL' is '{}'. Break set_dotenv.",
+                s.to_uppercase()
+            );
+            false
+        }
+        None => {
+            println!("Env 'IS_LOCAL' is not found. Continue set_dotenv.");
+            true
+        }
+    }
+}
+
 /// dotenvファイルを読み込む
 /// 読み込み順の関係上、tracingではなくprintln!()を使っている
 pub fn set_dotenv(package: &str) {
+    // dotenvの読み込みが必要でなければ関数を抜ける
+    if !is_required_set_dotenv() {
+        return;
+    }
+
     // ルートで実行されない場合に備え、
     // カレントあるいは親ディレクトリからdotenvを探す
     let current_dir = match std::env::current_dir() {
