@@ -29,9 +29,7 @@ impl SqliteDb {
     }
 
     async fn writer_pool(filename: &str) -> Pool<Sqlite> {
-        let options = SqliteConnectOptions::new()
-            .create_if_missing(true)
-            .filename(filename);
+        let options = SqliteConnectOptions::new().filename(filename);
         SqlitePoolOptions::new()
             .max_connections(1)
             .connect_with(options)
