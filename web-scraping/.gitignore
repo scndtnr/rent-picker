@@ -2,3 +2,4 @@
 target
 log/*/app.log.*
 .env
+.env.docker

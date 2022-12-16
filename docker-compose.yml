@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  web-scraping:
+    image: rent-picker-web-scraping:bullseye-slim
+    build:
+      context: web-scraping
+      dockerfile: Dockerfile
+    env_file:
+      - web-scraping/dotenv/.env.docker
+    ports:
+      - 3020:3020
+    # サーバがリッスンしているのでttyは不要
+    tty: true
