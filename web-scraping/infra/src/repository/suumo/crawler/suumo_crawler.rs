@@ -1,4 +1,4 @@
-use super::{selector::SuumoSelector, SearchQueryParams, SortType, Transfers};
+use super::{selector, SearchQueryParams, SortType, Transfers};
 use crate::repository::{crawler::HttpClient, HtmlParser};
 use anyhow::{bail, Context, Result};
 use domain::model::{Jst, RoomHeader, RoomHeaders, Rooms, TargetArea};
@@ -6,7 +6,7 @@ use reqwest::Url;
 use usecase::env::get_env_var;
 
 #[async_trait::async_trait]
-pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
+pub trait SuumoCrawler: HttpClient + HtmlParser {
     /// Suumoのヘルスチェック。トップページにログインできるかどうか。
     #[tracing::instrument(skip_all, err(Debug))]
     async fn health_check(&self) -> Result<()> {
@@ -16,7 +16,8 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
 
         // トップページのh1テキストを読む
         let text = res.text().await?;
-        let top_kanto_title = self.innter_text_of_element(&text, self.kanto_title(), ",");
+        let top_kanto_title =
+            self.innter_text_of_element(&text, selector::health_check::kanto_title().as_str(), ",");
         tracing::info!("{}", top_kanto_title);
 
         // テキスト内容のチェック
@@ -60,7 +61,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
         let html = res.text().await?;
         let max_page_number: usize = {
             let html = self.parse_html(&html);
-            self.find_elements(&html, self.pagination_parts())
+            self.find_elements(&html, selector::room_header::pagination_parts().as_str())
                 .into_iter()
                 .map(|element| self.inner_text(&element, ""))
                 .map(|page_number| {
@@ -108,58 +109,91 @@ pub trait SuumoCrawler: HttpClient + HtmlParser + SuumoSelector {
         let text = res.text().await?;
         let room_headers: RoomHeaders = {
             let html = self.parse_html(&text);
-            self.find_elements(&html, self.residence_root())
+            self.find_elements(&html, selector::room_header::residence_root().as_str())
                 .into_iter()
                 .flat_map(|element| {
                     // 住居情報を取得する
-                    let residence_title =
-                        self.find_inner_text_by_element(&element, self.residence_title(), ",");
-                    let residence_address =
-                        self.find_inner_text_by_element(&element, self.residence_address(), "\n");
-                    let residence_nearest_station = self.find_inner_text_by_element(
+                    let residence_title = self.find_inner_text_by_element(
                         &element,
-                        self.residence_nearest_station(),
+                        selector::room_header::residence_title().as_str(),
+                        ",",
+                    );
+                    let residence_address = self.find_inner_text_by_element(
+                        &element,
+                        selector::room_header::residence_address().as_str(),
                         "\n",
                     );
-                    let residence_age =
-                        self.find_inner_text_by_element(&element, self.residence_age(), "\n");
-                    let residence_floors =
-                        self.find_inner_text_by_element(&element, self.residence_floors(), "\n");
-                    let residence_transfer =
-                        self.find_inner_text_by_element(&element, self.residence_transfer(), "\n");
+                    let residence_nearest_station = self.find_inner_text_by_element(
+                        &element,
+                        selector::room_header::residence_nearest_station().as_str(),
+                        "\n",
+                    );
+                    let residence_age = self.find_inner_text_by_element(
+                        &element,
+                        selector::room_header::residence_age().as_str(),
+                        "\n",
+                    );
+                    let residence_floors = self.find_inner_text_by_element(
+                        &element,
+                        selector::room_header::residence_floors().as_str(),
+                        "\n",
+                    );
+                    let residence_transfer = self.find_inner_text_by_element(
+                        &element,
+                        selector::room_header::residence_transfer().as_str(),
+                        "\n",
+                    );
 
                     //  各部屋のURLを取得し、Room構造体のVecに変換する
                     let room_headers: Vec<RoomHeader> = self
-                        .find_elements_by_element(&element, self.rooms())
+                        .find_elements_by_element(&element, selector::room_header::rooms().as_str())
                         .into_iter()
                         .map(|room| {
                             let url = format!(
                                 "{}{}",
                                 &url_domain,
-                                self.find_element_by_element(&room, self.room_path())
-                                    .unwrap()
-                                    .value()
-                                    .attr("href")
-                                    .expect("Fail to get room path.")
+                                self.find_element_by_element(
+                                    &room,
+                                    selector::room_header::room_path().as_str()
+                                )
+                                .unwrap()
+                                .value()
+                                .attr("href")
+                                .expect("Fail to get room path.")
                             );
-                            let room_floor =
-                                self.find_inner_text_by_element(&room, self.room_floor(), "\n");
-                            let room_rent_price = self.find_inner_text_by_element(
+                            let room_floor = self.find_inner_text_by_element(
                                 &room,
-                                self.room_rent_price(),
+                                selector::room_header::room_floor().as_str(),
                                 "\n",
                             );
-                            let room_condo_fee =
-                                self.find_inner_text_by_element(&room, self.room_condo_fee(), "\n");
-                            let room_deposit =
-                                self.find_inner_text_by_element(&room, self.room_deposit(), "\n");
-                            let room_key_money =
-                                self.find_inner_text_by_element(&room, self.room_key_money(), "\n");
-                            let room_layout =
-                                self.find_inner_text_by_element(&room, self.room_layout(), "\n");
+                            let room_rent_price = self.find_inner_text_by_element(
+                                &room,
+                                selector::room_header::room_rent_price().as_str(),
+                                "\n",
+                            );
+                            let room_condo_fee = self.find_inner_text_by_element(
+                                &room,
+                                selector::room_header::room_condo_fee().as_str(),
+                                "\n",
+                            );
+                            let room_deposit = self.find_inner_text_by_element(
+                                &room,
+                                selector::room_header::room_deposit().as_str(),
+                                "\n",
+                            );
+                            let room_key_money = self.find_inner_text_by_element(
+                                &room,
+                                selector::room_header::room_key_money().as_str(),
+                                "\n",
+                            );
+                            let room_layout = self.find_inner_text_by_element(
+                                &room,
+                                selector::room_header::room_layout().as_str(),
+                                "\n",
+                            );
                             let room_exclusive_area = self.find_inner_text_by_element(
                                 &room,
-                                self.room_exclusive_area(),
+                                selector::room_header::room_exclusive_area().as_str(),
                                 "^",
                             );
 
