@@ -5,7 +5,7 @@ use futures::{stream, StreamExt, TryStreamExt};
 use sqlx::{QueryBuilder, Sqlite};
 use usecase::env::get_usize_of_env_var;
 
-use super::{repository_impl::SqliteRepositoryImpl, Sql};
+use super::{repository_impl::SqliteRepositoryImpl, sql};
 use anyhow::Result;
 use domain::{
     model::{AsVec, RoomHeader, RoomHeaders, TableType, TargetArea},
@@ -29,7 +29,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(skip_all, err(Debug))]
     async fn select_group_by_pk_from_temp_table(&self) -> Result<RoomHeaders> {
         let pool = self.reader_pool();
-        let sql = Sql::new().room_header.select_group_by_pk(TableType::Temp);
+        let sql = sql::room_header::select_group_by_pk(TableType::Temp);
         let headers_dto = sqlx::query_as::<_, RoomHeaderTable>(&sql)
             .fetch_all(&*pool)
             .await?;
@@ -47,7 +47,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     async fn insert(&self, source: &RoomHeader, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
-        let sql = Sql::new().room_header.insert_all_column(table);
+        let sql = sql::room_header::insert_all_column(table);
         let _ = sqlx::query(&sql)
             .bind(dto.url)
             .bind(dto.residence_title)
@@ -75,7 +75,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
     async fn insert_many_one_by_one(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
         // プログレスバーの準備
-        let target_table = Sql::new().room_header.table_name(&table);
+        let target_table = sql::room_header::table_name(&table);
         let pb_records = new_progress_bar(source.len() as u64).await;
         pb_records.set_message(format!("Insert to {}...", target_table));
 
@@ -104,7 +104,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
     async fn insert_many_multi(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
         // プログレスバーの準備
-        let target_table = Sql::new().room_header.table_name(&table);
+        let target_table = sql::room_header::table_name(&table);
         let pb_records = new_progress_bar(source.len() as u64).await;
         pb_records.set_message(format!("Insert to {}...", target_table));
 
@@ -125,7 +125,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .chunks(n)
             .map(|headers| {
                 let mut query_builder: QueryBuilder<Sqlite> =
-                    QueryBuilder::new(Sql::new().room_header.insert_all_header(table.clone()));
+                    QueryBuilder::new(sql::room_header::insert_all_header(table.clone()));
                 query_builder.push_values(headers, |mut b, header| {
                     b.push_bind(header.url.clone())
                         .push_bind(header.residence_title.clone())
@@ -168,9 +168,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "trace", skip_all, err(Debug))]
     async fn insert_to_load_from_temp_all(&self) -> Result<()> {
         let pool = self.writer_pool();
-        let sql = Sql::new()
-            .room_header
-            .insert_from_other_table_all(TableType::Load, TableType::Temp);
+        let sql = sql::room_header::insert_from_other_table_all(TableType::Load, TableType::Temp);
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -179,9 +177,8 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "trace", skip_all, err(Debug))]
     async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
-        let sql = Sql::new()
-            .room_header
-            .insert_from_other_table_group_by_pk(TableType::Main, TableType::Temp);
+        let sql =
+            sql::room_header::insert_from_other_table_group_by_pk(TableType::Main, TableType::Temp);
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -189,7 +186,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "trace", skip_all, fields(table=table.to_string()), err(Debug))]
     async fn delete_all(&self, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
-        let sql = Sql::new().room_header.delete_all(table);
+        let sql = sql::room_header::delete_all(table);
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -198,7 +195,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     async fn delete_by_pk(&self, source: &RoomHeader, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderTable = source.clone().into();
-        let sql = Sql::new().room_header.delete_by_pk(table);
+        let sql = sql::room_header::delete_by_pk(table);
         let _ = sqlx::query(&sql).bind(dto.url).execute(&*pool).await?;
         Ok(())
     }
@@ -206,7 +203,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(skip_all, fields(len=source.len(), table=table.to_string()), err(Debug))]
     async fn delete_many_by_pk(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
         // プログレスバーの準備
-        let target_table = Sql::new().room_header.table_name(&table);
+        let target_table = sql::room_header::table_name(&table);
         let pb_records = new_progress_bar(source.len() as u64).await;
         pb_records.set_message(format!("Delete target record from {}...", target_table));
 
@@ -237,9 +234,10 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(skip_all, err(Debug))]
     async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
-        let sql = Sql::new()
-            .room_header
-            .delete_where_group_by_pk_from_other_table(TableType::Main, TableType::Temp);
+        let sql = sql::room_header::delete_where_group_by_pk_from_other_table(
+            TableType::Main,
+            TableType::Temp,
+        );
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
