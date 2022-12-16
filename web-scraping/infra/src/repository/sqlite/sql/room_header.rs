@@ -1,7 +1,7 @@
 use domain::model::TableType;
 
 /// テーブル名を決定する
-pub fn table_name<'a>(table: &'a TableType) -> &'a str {
+pub fn table_name(table: &TableType) -> &str {
     match table {
         TableType::Main => "room_header",
         TableType::Load => "load_room_header",
