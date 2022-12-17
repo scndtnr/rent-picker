@@ -62,11 +62,13 @@ impl<R: Repositories> ScrapeRoomsUsecase<R> {
         Ok(rooms)
     }
 
+    #[allow(unused_variables)]
     #[tracing::instrument(skip_all, err(Debug))]
     async fn save_room_headers_to_database(&self, room_headers: &RoomHeaders) -> Result<()> {
         todo!()
     }
 
+    #[allow(unused_variables)]
     #[tracing::instrument(skip_all, err(Debug))]
     async fn save_rooms_to_database(&self, rooms: &Rooms) -> Result<()> {
         todo!()

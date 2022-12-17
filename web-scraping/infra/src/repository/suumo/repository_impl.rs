@@ -97,6 +97,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
     }
 
     /// RoomHeadersから、賃貸の詳細情報を取得する
+    #[allow(unused_variables)]
     async fn rooms_by_room_headers(
         &self,
         crawler: &Self::Crawler,
