@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+
+  sqlite-restore:
+    image: litestream/litestream
+    tty: true
+    env_file:
+      - ./litestream/.env
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+      - type: bind
+        source: ./litestream
+        target: /opt/litestream
+    entrypoint: /bin/sh
+    command: [-c, "
+      rm -f /data/rent-picker.sqlite3 &&
+      /usr/local/bin/litestream restore -config /opt/litestream/litestream.yaml /data/rent-picker.sqlite3
+      "]
+
+  web-scraping:
+    image: us-west1-docker.pkg.dev/zumi-sandbox/rent-picker/web-scraping:debug-bullseye-slim
+    tty: true
+    env_file:
+      - web-scraping/dotenv/.env.docker
+    depends_on:
+      - 'sqlite-restore'
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+
+  sqlite-backup:
+    image: litestream/litestream
+    tty: true
+    env_file:
+      - ./litestream/.env
+    depends_on:
+      - 'web-scraping'
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+      - type: bind
+        source: ./litestream
+        target: /opt/litestream
+    entrypoint: /bin/sh
+    command: [-c, "
+      /usr/local/bin/litestream replicate -config /opt/litestream/litestream.yaml
+      "]
