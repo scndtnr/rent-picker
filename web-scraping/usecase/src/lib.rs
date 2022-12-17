@@ -1,4 +1,6 @@
 pub mod env;
-pub mod usecase;
+mod usecase;
 
-pub use usecase::{HealthCheckUsecase, Usecases};
+pub use self::usecase::{
+    HealthCheckUsecase, ScrapeRoomHeadersUsecase, ScrapeRoomsUsecase, Usecases,
+};

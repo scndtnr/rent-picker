@@ -1,5 +1,5 @@
 use domain::model::{RoomHeaders, Rooms};
-use usecase::usecase::Usecases;
+use usecase::Usecases;
 
 use crate::dto::SuumoRequestDto;
 

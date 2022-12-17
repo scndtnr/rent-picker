@@ -1,8 +1,5 @@
 use domain::repository::Repositories;
-use usecase::{
-    usecase::{ScrapeRoomHeadersUsecase, ScrapeRoomsUsecase},
-    HealthCheckUsecase, Usecases,
-};
+use usecase::{HealthCheckUsecase, ScrapeRoomHeadersUsecase, ScrapeRoomsUsecase, Usecases};
 
 use crate::RepositoryImpls;
 
