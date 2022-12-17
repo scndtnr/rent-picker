@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'release/**'
-      # - 'develop'
+      - 'develop'
       - 'feature/**'
     paths:
       # if web-scraping file not changed, do not trigger build job.
