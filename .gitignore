@@ -1,3 +1,7 @@
 .history
 sqlite3def.exe
 rent-picker.sqlite3
+litestream/.env
+litestream/*.json
+litestream/litestream.yaml
+litestream/litestream.yaml.aws

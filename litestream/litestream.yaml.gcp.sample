@@ -1,0 +1,8 @@
+dbs:
+  - path: /data/db.sqlite3
+    replicas:
+      - type: gcs
+        name: db.sqlite3
+        bucket: your-bucket
+        path: db.sqlite3
+        sync-interval: 1s

@@ -1,0 +1,12 @@
+dbs:
+  - path: /data/db.sqlite3
+    replicas:
+      - type: s3
+        name: db.sqlite3
+        bucket: your-bucket
+        path: db.sqlite3
+        region: ap-northeast-1
+        forcePathStyle: true
+        sync-interval: 1s
+        access-key-id: your-minio-access-key
+        secret-access-key: your-minio-secret-key
