@@ -1,0 +1,57 @@
+name: web-scraping-test
+on:
+  push:
+    branches:
+      - 'develop'
+    paths:
+      # if web-scraping file not changed, do not trigger build job.
+      - 'web-scraping/*'
+      - '.github/workflows/web-scraping-*.yml'
+
+jobs:
+  web-scraping-tests:
+    name: ${{matrix.task.command}} Rust ${{ matrix.rust }} (on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable]
+        task: [
+          {command: fmt, args: --all -- --check},
+          {command: clippy, args: --all-targets --all-features -- -D warnings},
+          # {command: test, args: --all},  # llvm-cov が test しているので不要
+          {command: llvm-cov, args: --workspace --html},
+        ]
+    env: 
+      RUST_BACKTRACE: full
+      TZ: 'Asia/Tokyo'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust and llvm-tools-preview
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: llvm-tools-preview
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: Swatinem/rust-cache@v1
+        with:
+          working-directory: web-scraping
+          key: ${{ matrix.os }}-${{ matrix.task.command }}
+      - name: Exec cargo command
+        # # Setting of "working-directory" doesn't work at actions-rs/cargo@v1
+        # uses: actions-rs/cargo@v1
+        # with:
+        #   command: ${{ matrix.task.command }}
+        #   args: ${{ matrix.task.args }}
+        run: cargo ${{ matrix.task.command }} ${{ matrix.task.args }}
+        working-directory: web-scraping
+      - name: Archive coverage results
+        if: matrix.task.command == 'llvm-cov'
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: target/llvm-cov/html
