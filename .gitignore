@@ -5,3 +5,4 @@ litestream/.env
 litestream/*.json
 litestream/litestream.yaml
 litestream/litestream.yaml.aws
+data/*

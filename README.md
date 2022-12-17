@@ -36,7 +36,7 @@ sqldef のバイナリは[リリースページ](https://github.com/k0kubun/sqld
 sqlite3def --file=<sql_file_path> <db_name>
 
 # example
-./sqlite3def --file=sql-ddl/create_table_room_header.sql rent-picker.sqlite3
+./sqlite3def --file=sql-ddl/create_table_room_header.sql data/rent-picker.sqlite3
 ```
 
 
