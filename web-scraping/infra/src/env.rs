@@ -8,11 +8,13 @@ fn is_required_set_dotenv() -> bool {
             );
             true
         }
-        Some(s) => {
-            println!(
-                "Env 'IS_LOCAL' is '{}'. Break set_dotenv.",
-                s.to_uppercase()
-            );
+        Some(_s) => {
+            // // comment out for cli tool of bunyan.
+            // // not to make this first std output
+            // println!(
+            //     "Env 'IS_LOCAL' is '{}'. Break set_dotenv.",
+            //     s.to_uppercase()
+            // );
             false
         }
         None => {
