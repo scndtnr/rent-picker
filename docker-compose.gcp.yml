@@ -21,7 +21,7 @@ services:
       "]
 
   web-scraping:
-    image: us-west1-docker.pkg.dev/zumi-sandbox/rent-picker/web-scraping:debug-bullseye-slim
+    image: us-west1-docker.pkg.dev/zumi-sandbox/rent-picker/web-scraping:release-bullseye-slim
     tty: true
     env_file:
       - web-scraping/dotenv/.env.docker

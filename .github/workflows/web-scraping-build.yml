@@ -53,11 +53,11 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: web-scraping
-          file: web-scraping/Dockerfile
+          file: web-scraping/Dockerfile_release
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:debug-bullseye-slim-${{github.sha}}
-            ${{ env.IMAGE_NAME }}:debug-bullseye-slim
+            ${{ env.IMAGE_NAME }}:release-bullseye-slim-${{github.sha}}
+            ${{ env.IMAGE_NAME }}:release-bullseye-slim
             ${{ env.IMAGE_NAME }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max

@@ -12,6 +12,8 @@ version = "0.1.0"
 edition = "2021"
 description = "Tool to get rental information by web scraping in Rust"
 
+[profile.release]
+strip = "symbols"
 
 [workspace.dependencies]
 # ローカルクレート

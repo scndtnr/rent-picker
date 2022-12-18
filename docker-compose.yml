@@ -21,10 +21,10 @@ services:
       "]
 
   web-scraping:
-    image: rent-picker-web-scraping:bullseye-slim
+    image: rent-picker-web-scraping:release-bullseye-slim
     build:
       context: web-scraping
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_release
     tty: true
     env_file:
       - web-scraping/dotenv/.env.docker
