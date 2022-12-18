@@ -41,6 +41,7 @@ impl<U: Usecases> Controller<U> {
                 dto.area.try_into().expect("Fail to convert target area."),
                 &dto.station,
                 dto.save,
+                dto.dry_run,
             )
             .await
             .expect("Fail to scrape room headers from Suumo.")

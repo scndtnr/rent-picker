@@ -55,6 +55,7 @@ impl Cui {
             args.station.clone(),
             args.save,
             args.headers_from_database,
+            args.dry_run,
         );
 
         let _res = self.controller.scrape_rooms_from_suumo(dto).await;
@@ -72,6 +73,7 @@ impl Cui {
             args.station.clone(),
             args.save,
             args.headers_from_database,
+            args.dry_run,
         );
 
         let _res = self.controller.scrape_room_headers_from_suumo(dto).await;

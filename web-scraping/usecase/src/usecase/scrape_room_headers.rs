@@ -24,6 +24,7 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
         area: TargetArea,
         station: &str,
         save: bool,
+        dry_run: bool,
     ) -> Result<RoomHeaders> {
         // 前準備
         let crawler = self.suumo_repo.new_crawler().await;
