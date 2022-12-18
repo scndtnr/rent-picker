@@ -34,6 +34,9 @@ services:
       - type: bind
         source: ./data
         target: /data
+      - type: bind
+        source: ./log
+        target: /log
 
   sqlite-backup:
     image: litestream/litestream
