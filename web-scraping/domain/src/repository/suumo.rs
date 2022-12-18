@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use url::Url;
 
 use crate::model::{RoomHeaders, Rooms, TargetArea};
 
@@ -15,10 +16,19 @@ pub trait SuumoRepository {
     /// Suumoのヘルスチェック。トップページにログインできるかどうか。
     async fn health_check(&self, crawler: &Self::Crawler) -> Result<()>;
 
-    /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
-    async fn room_headers_by_area_and_station(
+    /// 住居の属する地域や、通勤先の駅を指定して、賃貸一覧ページのURLを取得する
+    async fn urls_of_list_page(
         &self,
         crawler: &Self::Crawler,
+        area: &TargetArea,
+        station: &str,
+    ) -> Result<Vec<Url>>;
+
+    /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
+    async fn room_headers(
+        &self,
+        crawler: &Self::Crawler,
+        urls: Vec<Url>,
         area: &TargetArea,
         station: &str,
     ) -> Result<RoomHeaders>;

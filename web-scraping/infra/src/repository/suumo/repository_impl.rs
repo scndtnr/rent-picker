@@ -6,6 +6,7 @@ use domain::{
     repository::SuumoRepository,
 };
 use futures::{stream, StreamExt, TryStreamExt};
+use reqwest::Url;
 
 use crate::{progress_bar::new_progress_bar, repository::ReqwestCrawler};
 use usecase::env::get_usize_of_env_var;
@@ -42,21 +43,31 @@ impl SuumoRepository for SuumoRepositoryImpl {
         crawler.health_check().await
     }
 
-    /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
-    async fn room_headers_by_area_and_station(
+    /// 住居の属する地域や、通勤先の駅を指定して、賃貸一覧ページのURLを取得する
+    #[tracing::instrument(skip(self, crawler), err(Debug))]
+    async fn urls_of_list_page(
         &self,
         crawler: &Self::Crawler,
         area: &TargetArea,
         station: &str,
-    ) -> Result<RoomHeaders> {
+    ) -> Result<Vec<Url>> {
         // 検索条件を選択し、賃貸一覧ページの1ページ目のURLを取得する
         let mut url = crawler.url_of_room_list(area.clone(), station).await?;
 
         // 最後のページ番号を確認し、各ページのURLを生成する
-        let urls = crawler.urls_of_room_list(&mut url).await?;
+        crawler.urls_of_room_list(&mut url).await
+    }
 
+    /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
+    #[tracing::instrument(skip_all, fields(urls_length=urls.len()) err(Debug))]
+    async fn room_headers(
+        &self,
+        crawler: &Self::Crawler,
+        urls: Vec<Url>,
+        area: &TargetArea,
+        station: &str,
+    ) -> Result<RoomHeaders> {
         // 各賃貸一覧ページから住居情報や詳細ページへのURLを取得する
-        tracing::info!("Urls length: {}", urls.len());
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
         let max_page = get_usize_of_env_var("MAX_PAGE");
         let urls = if urls.len() <= (max_page) {

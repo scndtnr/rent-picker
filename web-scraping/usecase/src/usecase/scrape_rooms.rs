@@ -37,8 +37,16 @@ impl<R: Repositories> ScrapeRoomsUsecase<R> {
                 .await?
         } else {
             // Webサイトから取得する
+            // 住居の属する地域や、通勤先の駅を指定して、賃貸一覧ページのURLを取得する
+            let urls = self
+                .suumo_repo
+                .urls_of_list_page(&crawler, &area, station)
+                .await?;
+            tracing::info!("Urls length: {}", urls.len());
+
+            // 賃貸一覧ページから各部屋情報を取得する
             self.suumo_repo
-                .room_headers_by_area_and_station(&crawler, &area, station)
+                .room_headers(&crawler, urls, &area, station)
                 .await?
         };
         tracing::info!("{:#?}", room_headers.len());

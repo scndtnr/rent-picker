@@ -29,10 +29,23 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
         // 前準備
         let crawler = self.suumo_repo.new_crawler().await;
 
-        // 指定した地域・通勤先の駅を元に賃貸情報を取得する
+        // 住居の属する地域や、通勤先の駅を指定して、賃貸一覧ページのURLを取得する
+        let urls = self
+            .suumo_repo
+            .urls_of_list_page(&crawler, &area, station)
+            .await?;
+        tracing::info!("Urls length: {}", urls.len());
+
+        // 仮実行の場合、ここで処理を終了する
+        if dry_run {
+            let dummy_room_headers: RoomHeaders = Vec::new().into();
+            return Ok(dummy_room_headers);
+        }
+
+        // 賃貸一覧ページから各部屋情報を取得する
         let room_headers = self
             .suumo_repo
-            .room_headers_by_area_and_station(&crawler, &area, station)
+            .room_headers(&crawler, urls, &area, station)
             .await?;
 
         // 賃貸概要をデータベースに保存する
