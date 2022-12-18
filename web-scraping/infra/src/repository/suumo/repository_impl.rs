@@ -8,7 +8,10 @@ use domain::{
 use futures::{stream, StreamExt, TryStreamExt};
 use reqwest::Url;
 
-use crate::{progress_bar::new_progress_bar, repository::ReqwestCrawler};
+use crate::{
+    progress_bar::{log_trace_progress, new_progress_bar},
+    repository::ReqwestCrawler,
+};
 use usecase::env::get_usize_of_env_var;
 
 use super::SuumoCrawler;
@@ -90,6 +93,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
                     .context("Fail to parse room headers infomation.")?;
                 // プログレスバーをインクリメントする
                 pb_urls.inc(1);
+                log_trace_progress(&pb_urls, "Web Scraping in list page...").await;
 
                 anyhow::Ok(room_headers)
             })

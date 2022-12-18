@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use crate::{model::RoomHeaderTable, progress_bar::new_progress_bar};
+use crate::{
+    model::RoomHeaderTable,
+    progress_bar::{log_trace_progress, new_progress_bar},
+};
 use futures::{stream, StreamExt, TryStreamExt};
 use sqlx::{QueryBuilder, Sqlite};
 use usecase::env::get_usize_of_env_var;
@@ -87,6 +90,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .map(|(header, pb_records, table)| async move {
                 self.insert(&header, table).await?;
                 pb_records.inc(1);
+                log_trace_progress(&pb_records, "Insert record...").await;
                 Ok(())
             })
             .buffer_unordered(buffered_n)
@@ -156,6 +160,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             let query = builder.build();
             query.execute(&*pool).await?;
             pb_records.inc(n as u64);
+            log_trace_progress(&pb_records, "Insert record...").await;
         }
 
         // プログレスバーの後始末
@@ -215,6 +220,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .map(|(header, pb_records, table)| async move {
                 self.delete_by_pk(&header, table).await?;
                 pb_records.inc(1);
+                log_trace_progress(&pb_records, "Delete target record...").await;
                 Ok(())
             })
             .buffer_unordered(buffered_n)

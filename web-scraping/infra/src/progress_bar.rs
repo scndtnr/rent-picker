@@ -1,6 +1,6 @@
 use std::{fmt::Write, sync::Arc};
 
-use indicatif::{ProgressBar, ProgressState, ProgressStyle};
+use indicatif::{FormattedDuration, HumanDuration, ProgressBar, ProgressState, ProgressStyle};
 
 async fn progress_bar_style() -> ProgressStyle {
     ProgressStyle::with_template(
@@ -18,4 +18,15 @@ pub(crate) async fn new_progress_bar(total: u64) -> Arc<ProgressBar> {
     let pb = ProgressBar::new(total);
     pb.set_style(style);
     Arc::new(pb)
+}
+
+pub(crate) async fn log_trace_progress(pb: &ProgressBar, msg: &str) {
+    tracing::trace!(
+        "[{}] {:>9}/{:<9}  ({:#}) {}",
+        FormattedDuration(pb.elapsed()),
+        pb.position(),
+        pb.length().unwrap_or(0),
+        HumanDuration(pb.eta()),
+        msg
+    );
 }
