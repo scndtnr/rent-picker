@@ -1,5 +1,5 @@
 use sqlx::{
-    sqlite::{SqliteConnectOptions, SqlitePoolOptions},
+    sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions},
     Pool, Sqlite,
 };
 use std::sync::Arc;
@@ -29,7 +29,10 @@ impl SqliteDb {
     }
 
     async fn writer_pool(filename: &str) -> Pool<Sqlite> {
-        let options = SqliteConnectOptions::new().filename(filename);
+        let options = SqliteConnectOptions::new()
+            .filename(filename)
+            .journal_mode(SqliteJournalMode::Wal)
+            .pragma("busy_timeout", "5000");
         SqlitePoolOptions::new()
             .max_connections(1)
             .connect_with(options)
@@ -41,7 +44,8 @@ impl SqliteDb {
 
     async fn reader_pool(filename: &str, max_concurrency: u32) -> Pool<Sqlite> {
         let options = SqliteConnectOptions::new()
-            .create_if_missing(true)
+            .journal_mode(SqliteJournalMode::Wal)
+            .pragma("busy_timeout", "5000")
             .read_only(true)
             .filename(filename);
         SqlitePoolOptions::new()
