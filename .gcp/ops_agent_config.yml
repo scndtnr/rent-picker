@@ -1,0 +1,72 @@
+# Google Ops agent configuration file
+#
+# ----- About -----
+# path: /etc/google-cloud-ops-agent/config.yaml
+# docs: https://cloud.google.com/stackdriver/docs/solutions/agents/ops-agent/configuration
+# repo: https://github.com/GoogleCloudPlatform/ops-agent
+#
+# ----- Usage -----
+# sudo hx /etc/google-cloud-ops-agent/config.yaml
+# sudo service google-cloud-ops-agent restart
+# 
+# ----- Trouble Shooting -----
+# 
+# sudo journalctl -xe | grep "google_cloud_ops_agent_engine"
+#
+# ----- Issues -----
+# map_values is now broken:
+# [2.22.0 -> 2.23.0 upgrade broke 'map_values' configuration · Issue #994 · GoogleCloudPlatform/ops-agent](https://github.com/GoogleCloudPlatform/ops-agent/issues/994)
+# 
+
+---
+logging:
+  receivers:
+    rent-picker-log:
+      type: files
+      include_paths:
+        - /home/zumi/rent-picker/log/web-scraping/*/app.log*
+  processors:
+    parse_json:
+      type: parse_json
+    parse_log_name:
+      type: modify_fields
+      fields:
+        logName:
+          copy_from: jsonPayload.name
+    # set_severity:
+    #   type: modify_fields
+    #   fields:
+    #     severity:
+    #       copy_from: jsonPayload.level
+    #       map_values:
+    #         '10': TRACE
+    #         '20': DEBUG
+    #         '30': INFO
+    #         '40': WARNING
+    #         '50': ERROR
+    #         '60': CRITICAL
+    set_source_location:
+      type: modify_fields
+      fields:
+        sourceLocation.file:
+          move_from: jsonPayload.file
+        sourceLocation.line:
+          move_from: jsonPayload.line
+          type: integer
+        sourceLocation.function:
+          move_from: jsonPayload.target
+    parse_time:
+      type: parse_json
+      time_key: time
+      time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
+  service:
+    pipelines:
+      custom_pipline:
+        receivers:
+          - rent-picker-log
+        processors:
+          - parse_json
+          - parse_log_name
+          # - set_severity
+          - set_source_location
+          - parse_time
