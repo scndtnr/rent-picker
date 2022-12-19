@@ -3,7 +3,7 @@ use tracing::{metadata::LevelFilter, Level};
 use tracing_appender::rolling::RollingFileAppender;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::{
-    filter::Targets, fmt::MakeWriter, layer::SubscriberExt, util::SubscriberInitExt,
+    filter::Targets, fmt::MakeWriter, layer::SubscriberExt, util::SubscriberInitExt, Layer,
 };
 
 use usecase::env::{get_bool_of_env_var, get_env_var};
@@ -41,23 +41,39 @@ impl LogConfigBuilder {
     fn build(&self) {
         match self.log_config_pattern {
             LogConfigPattern::BunyanMyAppOnly => tracing_subscriber::registry()
-                .with(self.only_myapp_filter())
                 .with(JsonStorageLayer)
-                .with(self.bunyan_stdio_format())
-                .with(self.bunyan_file_format(self.make_writer_to_file()))
+                .with(
+                    self.bunyan_stdio_format()
+                        .with_filter(self.only_myapp_filter(true)),
+                )
+                .with(
+                    self.bunyan_file_format(self.make_writer_to_file())
+                        .with_filter(self.only_myapp_filter(false)),
+                )
                 .init(),
             LogConfigPattern::BunyanAllApp => tracing_subscriber::registry()
-                .with(self.all_app_filter())
                 .with(JsonStorageLayer)
-                .with(self.bunyan_stdio_format())
-                .with(self.bunyan_file_format(self.make_writer_to_file()))
+                .with(
+                    self.bunyan_stdio_format()
+                        .with_filter(self.all_app_filter(true)),
+                )
+                .with(
+                    self.bunyan_file_format(self.make_writer_to_file())
+                        .with_filter(self.all_app_filter(false)),
+                )
                 .init(),
         }
     }
 
     // ------------------- filter layer ------------------------------
 
-    fn level(&self) -> Level {
+    fn level(&self, env_filter: bool) -> Level {
+        // 環境変数を使わない場合はTRACEを返す
+        if !env_filter {
+            return Level::TRACE;
+        };
+
+        // 環境変数を使う場合
         match get_env_var("LOG_LEVEL").unwrap() {
             s if s.to_uppercase() == "ERROR" => Level::ERROR,
             s if s.to_uppercase() == "WARN" => Level::WARN,
@@ -70,18 +86,18 @@ impl LogConfigBuilder {
 
     /// 出力対象クレートを自分のクレートのみとする
     /// （※ハイフンはアンダースコアに置き換えないと認識されない）
-    fn only_myapp_filter(&self) -> Targets {
+    fn only_myapp_filter(&self, env_filter: bool) -> Targets {
         tracing_subscriber::filter::Targets::new()
-            .with_target("infra", self.level())
-            .with_target("adapter", self.level())
-            .with_target("usecase", self.level())
-            .with_target("domain", self.level())
-            .with_target("cui", self.level())
+            .with_target("infra", self.level(env_filter))
+            .with_target("adapter", self.level(env_filter))
+            .with_target("usecase", self.level(env_filter))
+            .with_target("domain", self.level(env_filter))
+            .with_target("cui", self.level(env_filter))
     }
 
     /// 出力対象クレートに依存クレートも含める
-    fn all_app_filter(&self) -> LevelFilter {
-        tracing_subscriber::filter::LevelFilter::from_level(self.level())
+    fn all_app_filter(&self, env_filter: bool) -> LevelFilter {
+        tracing_subscriber::filter::LevelFilter::from_level(self.level(env_filter))
     }
 
     //  --------------------- format layer ----------------------------------

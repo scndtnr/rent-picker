@@ -9,6 +9,6 @@ rem 画面サイズ変更(表示位置はコマンドプロンプトのプロパ
 mode con: cols=185 lines=1000
 
 rem cargo経由で実行する
-cargo run -p cui -- %* | bunyan --level debug
+cargo run -p cui -- %* | bunyan
 
 pause
