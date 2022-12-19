@@ -21,11 +21,17 @@ pub(crate) async fn new_progress_bar(total: u64) -> Arc<ProgressBar> {
 }
 
 pub(crate) async fn debug_progress(pb: &ProgressBar, msg: &str) {
+    let length = pb.length().unwrap_or(0);
+    let position = if pb.position() < length {
+        pb.position()
+    } else {
+        length
+    };
     tracing::debug!(
         "[{}] {:>9}/{:<9}  ({:#}) {}",
         FormattedDuration(pb.elapsed()),
-        pb.position(),
-        pb.length().unwrap_or(0),
+        position,
+        length,
         HumanDuration(pb.eta()),
         msg
     );
