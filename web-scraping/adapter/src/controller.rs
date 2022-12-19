@@ -1,7 +1,7 @@
 use domain::model::{RoomHeaders, Rooms};
 use usecase::Usecases;
 
-use crate::dto::SuumoRequestDto;
+use crate::dto::{ReadDbRequestDto, SuumoRequestDto};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Controller<U> {
@@ -45,5 +45,20 @@ impl<U: Usecases> Controller<U> {
             )
             .await
             .expect("Fail to scrape room headers from Suumo.")
+    }
+
+    pub async fn read_db_for_summary(&self, dto: ReadDbRequestDto) {
+        self.usecases
+            .read_db_for_summary_usecase()
+            .read_room_headers_summary(
+                dto.table_name
+                    .try_into()
+                    .expect("Fail to convert table_name"),
+                dto.table_type
+                    .try_into()
+                    .expect("Fail to convert table_name"),
+            )
+            .await
+            .expect("Fail to read db for summary.")
     }
 }

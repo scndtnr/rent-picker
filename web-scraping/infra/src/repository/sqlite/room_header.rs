@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    model::RoomHeaderTable,
+    model::{RoomHeaderRecord, RoomHeaderSummaryRecord, RoomHeaderSummaryTable},
     progress_bar::{debug_progress, new_progress_bar},
 };
 use futures::{stream, StreamExt, TryStreamExt};
@@ -29,12 +29,31 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         todo!()
     }
 
+    /// 指定されたテーブルのサマリを表示する
+    #[tracing::instrument(level = "trace", skip_all, fields(table=table.to_string()), err(Debug))]
+    async fn display_summary(&self, table: TableType) -> Result<()> {
+        let pool = self.reader_pool();
+        let table_name = sql::room_header::table_name(&table);
+        let sql = sql::room_header_summary::group_by_area_and_station(&table);
+        let summary: RoomHeaderSummaryTable = sqlx::query_as::<_, RoomHeaderSummaryRecord>(&sql)
+            .fetch_all(&*pool)
+            .await?
+            .into();
+        tracing::info!("{:#?}", summary);
+        tracing::info!(
+            "[{}] Total records count : {}",
+            table_name,
+            summary.total_count()
+        );
+        Ok(())
+    }
+
     /// 作業用ロードテーブルからPKで集約したデータを取り出す
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn select_group_by_pk_from_temp_table(&self) -> Result<RoomHeaders> {
         let pool = self.reader_pool();
         let sql = sql::room_header::select_group_by_pk(TableType::Temp);
-        let headers_dto = sqlx::query_as::<_, RoomHeaderTable>(&sql)
+        let headers_dto = sqlx::query_as::<_, RoomHeaderRecord>(&sql)
             .fetch_all(&*pool)
             .await?;
 
@@ -50,7 +69,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), title=source.residence_title(), table=table.to_string()), err(Debug))]
     async fn insert(&self, source: &RoomHeader, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
-        let dto: RoomHeaderTable = source.clone().into();
+        let dto: RoomHeaderRecord = source.clone().into();
         let sql = sql::room_header::insert_all_column(table);
         let _ = sqlx::query(&sql)
             .bind(dto.url)
@@ -114,12 +133,12 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         pb_records.set_message(format!("Insert to {}...", target_table));
 
         // RoomHeadersをDTOのVecに変換する
-        let dto_headers: Vec<RoomHeaderTable> = source
+        let dto_headers: Vec<RoomHeaderRecord> = source
             .clone()
             .into_inner()
             .into_iter()
             .map(|header| {
-                let dto: RoomHeaderTable = header.into();
+                let dto: RoomHeaderRecord = header.into();
                 dto
             })
             .collect();
@@ -200,7 +219,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), title=source.residence_title(), table=table.to_string()), err(Debug))]
     async fn delete_by_pk(&self, source: &RoomHeader, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
-        let dto: RoomHeaderTable = source.clone().into();
+        let dto: RoomHeaderRecord = source.clone().into();
         let sql = sql::room_header::delete_by_pk(table);
         let _ = sqlx::query(&sql).bind(dto.url).execute(&*pool).await?;
         Ok(())

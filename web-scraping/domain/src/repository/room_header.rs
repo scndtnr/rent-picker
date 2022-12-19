@@ -11,6 +11,7 @@ pub trait RoomHeaderRepository {
         station: &str,
     ) -> Result<RoomHeaders>;
     async fn find_all(&self) -> Result<RoomHeaders>;
+    async fn display_summary(&self, table: TableType) -> Result<()>;
     async fn select_group_by_pk_from_temp_table(&self) -> Result<RoomHeaders>;
     async fn insert(&self, source: &RoomHeader, table: TableType) -> Result<()>;
     async fn insert_many_one_by_one(&self, source: &RoomHeaders, table: TableType) -> Result<()>;

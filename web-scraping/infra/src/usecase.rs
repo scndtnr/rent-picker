@@ -1,5 +1,8 @@
 use domain::repository::Repositories;
-use usecase::{HealthCheckUsecase, ScrapeRoomHeadersUsecase, ScrapeRoomsUsecase, Usecases};
+use usecase::{
+    HealthCheckUsecase, ReadDbForSummaryUsecase, ScrapeRoomHeadersUsecase, ScrapeRoomsUsecase,
+    Usecases,
+};
 
 use crate::RepositoryImpls;
 
@@ -8,6 +11,7 @@ pub struct UsecaseImpls {
     health_check_usecase: HealthCheckUsecase<RepositoryImpls>,
     scrape_rooms_usecase: ScrapeRoomsUsecase<RepositoryImpls>,
     scrape_room_headers_usecase: ScrapeRoomHeadersUsecase<RepositoryImpls>,
+    read_db_for_summary_usecase: ReadDbForSummaryUsecase<RepositoryImpls>,
 }
 
 impl Usecases for UsecaseImpls {
@@ -21,6 +25,9 @@ impl Usecases for UsecaseImpls {
     }
     fn scrape_room_headers_usecase(&self) -> &ScrapeRoomHeadersUsecase<Self::Repositories> {
         &self.scrape_room_headers_usecase
+    }
+    fn read_db_for_summary_usecase(&self) -> &ReadDbForSummaryUsecase<Self::Repositories> {
+        &self.read_db_for_summary_usecase
     }
 }
 
@@ -36,11 +43,14 @@ impl UsecaseImpls {
             repositories.suumo_repository().to_owned(),
             repositories.room_header_repository().to_owned(),
         );
+        let read_db_for_summary_usecase =
+            ReadDbForSummaryUsecase::new(repositories.room_header_repository().to_owned());
 
         Self {
             health_check_usecase,
             scrape_rooms_usecase,
             scrape_room_headers_usecase,
+            read_db_for_summary_usecase,
         }
     }
 }

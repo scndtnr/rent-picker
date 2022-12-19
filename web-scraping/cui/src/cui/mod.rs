@@ -1,7 +1,10 @@
 mod options;
 
-use self::options::{Item, Options, Service, Task, WebScrape};
-use adapter::{dto::SuumoRequestDto, Controller};
+use self::options::{DataAction, Options, ReadDb, Service, Table, Task, WebScrape};
+use adapter::{
+    dto::{ReadDbRequestDto, SuumoRequestDto},
+    Controller,
+};
 use clap::Parser;
 use infra::{persistence::sqlite::SqliteDb, RepositoryImpls, UsecaseImpls};
 
@@ -30,10 +33,15 @@ impl Cui {
                 Service::Suumo => self.process_health_check_suumo().await,
             },
             Task::WebScrape(args) => match args.service {
-                Service::Suumo => match args.item {
-                    Item::Rooms => self.process_scrape_suumo_rooms(args).await,
-                    Item::RoomHeaders => self.process_scrape_suumo_room_headers(args).await,
+                Service::Suumo => match args.table {
+                    Table::Room => self.process_scrape_suumo_rooms(args).await,
+                    Table::RoomHeader => self.process_scrape_suumo_room_headers(args).await,
                 },
+            },
+            Task::ReadDb(args) => match args.action {
+                DataAction::Summary => self.process_read_db_for_summary(args).await,
+                DataAction::Top => todo!(),
+                DataAction::Export => todo!(),
             },
         }
     }
@@ -81,5 +89,14 @@ impl Cui {
         // 結果表示
         // todo!("DTOを表示する形に修正する")
         // tracing::info!("{:#?}", res);
+    }
+
+    #[tracing::instrument(skip_all)]
+    async fn process_read_db_for_summary(&self, args: &ReadDb) {
+        tracing::debug!("read_db args : {:#?}", args);
+        let dto = ReadDbRequestDto::new(args.table.to_string(), args.table_type.to_string());
+
+        // サマリを表示する
+        self.controller.read_db_for_summary(dto).await;
     }
 }

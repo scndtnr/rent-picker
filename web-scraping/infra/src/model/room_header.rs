@@ -2,7 +2,7 @@ use domain::model::{Jst, RoomHeader};
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 
 #[derive(FromRow, Debug)]
-pub struct RoomHeaderTable {
+pub struct RoomHeaderRecord {
     pub url: String,
     pub residence_title: String,
     pub residence_address: String,
@@ -22,7 +22,7 @@ pub struct RoomHeaderTable {
     pub created_at: NaiveDateTime,
 }
 
-impl From<RoomHeader> for RoomHeaderTable {
+impl From<RoomHeader> for RoomHeaderRecord {
     fn from(header: RoomHeader) -> Self {
         Self {
             url: header.url().to_string(),
@@ -46,9 +46,9 @@ impl From<RoomHeader> for RoomHeaderTable {
     }
 }
 
-impl TryFrom<RoomHeaderTable> for RoomHeader {
+impl TryFrom<RoomHeaderRecord> for RoomHeader {
     type Error = anyhow::Error;
-    fn try_from(header: RoomHeaderTable) -> Result<Self, Self::Error> {
+    fn try_from(header: RoomHeaderRecord) -> Result<Self, Self::Error> {
         Ok(Self::new(
             header.url,
             header.residence_title,

@@ -1,3 +1,3 @@
 mod request;
 
-pub use request::{RequestDto, SuumoRequestDto};
+pub use request::{ReadDbRequestDto, RequestDto, SuumoRequestDto};
