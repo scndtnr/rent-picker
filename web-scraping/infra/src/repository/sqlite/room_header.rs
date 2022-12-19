@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     model::RoomHeaderTable,
-    progress_bar::{log_trace_progress, new_progress_bar},
+    progress_bar::{debug_progress, new_progress_bar},
 };
 use futures::{stream, StreamExt, TryStreamExt};
 use sqlx::{QueryBuilder, Sqlite};
@@ -30,7 +30,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     /// 作業用ロードテーブルからPKで集約したデータを取り出す
-    #[tracing::instrument(skip_all, err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn select_group_by_pk_from_temp_table(&self) -> Result<RoomHeaders> {
         let pool = self.reader_pool();
         let sql = sql::room_header::select_group_by_pk(TableType::Temp);
@@ -76,7 +76,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     /// 複数のデータを1件ずつinsertする。
-    #[tracing::instrument(skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
     async fn insert_many_one_by_one(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
         // プログレスバーの準備
         let target_table = sql::room_header::table_name(&table);
@@ -90,7 +90,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .map(|(header, pb_records, table)| async move {
                 self.insert(&header, table).await?;
                 pb_records.inc(1);
-                log_trace_progress(&pb_records, "Insert record...").await;
+                debug_progress(&pb_records, "Insert record...").await;
                 Ok(())
             })
             .buffer_unordered(buffered_n)
@@ -106,7 +106,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     /// 複数のデータを500件ずつinsertする。
-    #[tracing::instrument(skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
     async fn insert_many_multi(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
         // プログレスバーの準備
         let target_table = sql::room_header::table_name(&table);
@@ -160,7 +160,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             let query = builder.build();
             query.execute(&*pool).await?;
             pb_records.inc(n as u64);
-            log_trace_progress(&pb_records, "Insert record...").await;
+            debug_progress(&pb_records, "Insert record...").await;
         }
 
         // プログレスバーの後始末
@@ -171,7 +171,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     /// tempテーブルからloadテーブルに全件insertする
-    #[tracing::instrument(level = "trace", skip_all, err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn insert_to_load_from_temp_all(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = sql::room_header::insert_from_other_table_all(TableType::Load, TableType::Temp);
@@ -180,7 +180,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     /// tempテーブルからloadテーブルに全件insertする
-    #[tracing::instrument(level = "trace", skip_all, err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql =
@@ -189,7 +189,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    #[tracing::instrument(level = "trace", skip_all, fields(table=table.to_string()), err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, fields(table=table.to_string()), err(Debug))]
     async fn delete_all(&self, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
         let sql = sql::room_header::delete_all(table);
@@ -206,7 +206,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    #[tracing::instrument(skip_all, fields(len=source.len(), table=table.to_string()), err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, fields(len=source.len(), table=table.to_string()), err(Debug))]
     async fn delete_many_by_pk(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
         // プログレスバーの準備
         let target_table = sql::room_header::table_name(&table);
@@ -220,7 +220,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .map(|(header, pb_records, table)| async move {
                 self.delete_by_pk(&header, table).await?;
                 pb_records.inc(1);
-                log_trace_progress(&pb_records, "Delete target record...").await;
+                debug_progress(&pb_records, "Delete target record...").await;
                 Ok(())
             })
             .buffer_unordered(buffered_n)
@@ -238,7 +238,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    #[tracing::instrument(skip_all, err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = sql::room_header::delete_where_group_by_pk_from_other_table(

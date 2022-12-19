@@ -9,7 +9,7 @@ use futures::{stream, StreamExt, TryStreamExt};
 use reqwest::Url;
 
 use crate::{
-    progress_bar::{log_trace_progress, new_progress_bar},
+    progress_bar::{debug_progress, new_progress_bar},
     repository::ReqwestCrawler,
 };
 use usecase::env::get_usize_of_env_var;
@@ -41,13 +41,13 @@ impl SuumoRepository for SuumoRepositoryImpl {
     }
 
     /// Suumoのヘルスチェック。トップページにログインできるかどうか。
-    #[tracing::instrument(skip_all, err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn health_check(&self, crawler: &Self::Crawler) -> Result<()> {
         crawler.health_check().await
     }
 
     /// 住居の属する地域や、通勤先の駅を指定して、賃貸一覧ページのURLを取得する
-    #[tracing::instrument(skip(self, crawler), err(Debug))]
+    #[tracing::instrument(level = "debug", skip(self, crawler), err(Debug))]
     async fn urls_of_list_page(
         &self,
         crawler: &Self::Crawler,
@@ -62,7 +62,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
     }
 
     /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
-    #[tracing::instrument(skip_all, fields(urls_length=urls.len()) err(Debug))]
+    #[tracing::instrument(level = "debug", skip_all, fields(urls_length=urls.len()) err(Debug))]
     async fn room_headers(
         &self,
         crawler: &Self::Crawler,
@@ -93,7 +93,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
                     .context("Fail to parse room headers infomation.")?;
                 // プログレスバーをインクリメントする
                 pb_urls.inc(1);
-                log_trace_progress(&pb_urls, "Web Scraping in list page...").await;
+                debug_progress(&pb_urls, "Web Scraping in list page...").await;
 
                 anyhow::Ok(room_headers)
             })

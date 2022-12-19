@@ -8,7 +8,7 @@ use usecase::env::get_env_var;
 #[async_trait::async_trait]
 pub trait SuumoCrawler: HttpClient + HtmlParser {
     /// Suumoのヘルスチェック。トップページにログインできるかどうか。
-    #[tracing::instrument(skip_all, err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, err(Debug))]
     async fn health_check(&self) -> Result<()> {
         // suumo関東版のトップページを取得する
         let url = get_env_var("URL_SUUMO_KANTO_DOMAIN").unwrap();
@@ -29,7 +29,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     }
 
     /// 検索条件を指定して賃貸一覧ページのURLを取得する
-    #[tracing::instrument(skip_all, fields(area=area.to_string(), station=station), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(area=area.to_string(), station=station), err(Debug))]
     async fn url_of_room_list(&self, area: TargetArea, station: &str) -> Result<Url> {
         // 検索条件を指定したクエリパラメータを設定する
         let query = SearchQueryParams::builder()
@@ -51,7 +51,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     }
 
     // 最後のページ番号を確認し、各ページのURLを生成する
-    #[tracing::instrument(skip_all, fields(url=url.as_str()), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=url.as_str()), err(Debug))]
     async fn urls_of_room_list(&self, url: &mut Url) -> Result<Vec<Url>> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
@@ -229,7 +229,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[allow(unused_variables)]
-    #[tracing::instrument(skip_all, err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, err(Debug))]
     async fn rooms_in_detail_page(&self, headers: RoomHeaders) -> Result<Rooms> {
         todo!();
     }

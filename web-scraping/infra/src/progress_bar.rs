@@ -20,8 +20,8 @@ pub(crate) async fn new_progress_bar(total: u64) -> Arc<ProgressBar> {
     Arc::new(pb)
 }
 
-pub(crate) async fn log_trace_progress(pb: &ProgressBar, msg: &str) {
-    tracing::trace!(
+pub(crate) async fn debug_progress(pb: &ProgressBar, msg: &str) {
+    tracing::debug!(
         "[{}] {:>9}/{:<9}  ({:#}) {}",
         FormattedDuration(pb.elapsed()),
         pb.position(),
