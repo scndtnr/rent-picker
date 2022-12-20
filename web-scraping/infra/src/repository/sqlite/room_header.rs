@@ -114,7 +114,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    /// tempテーブルからloadテーブルに全件insertする
+    /// tempテーブルのPK集約レコードをmainテーブルにinsertする
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
@@ -124,6 +124,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
+    /// 対象テーブルのレコードを全件deleteする
     #[tracing::instrument(level = "debug", skip_all, fields(table=table.to_string()), err(Debug))]
     async fn delete_all(&self, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
@@ -132,6 +133,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
+    /// tempテーブルのPK集約レコードと合致するレコードをmainテーブルから削除する
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
