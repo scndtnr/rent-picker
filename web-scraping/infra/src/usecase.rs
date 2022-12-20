@@ -38,6 +38,7 @@ impl UsecaseImpls {
         let scrape_raw_rooms_usecase = ScrapeRawRoomsUsecase::new(
             repositories.suumo_repository().to_owned(),
             repositories.room_header_repository().to_owned(),
+            repositories.raw_room_repository().to_owned(),
         );
         let scrape_room_headers_usecase = ScrapeRoomHeadersUsecase::new(
             repositories.suumo_repository().to_owned(),
