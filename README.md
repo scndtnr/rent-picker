@@ -32,11 +32,16 @@ Rustで賃貸情報をスクレイピングし、Pythonで機械学習させて�
 sqldef のバイナリは[リリースページ](https://github.com/k0kubun/sqldef/releases)からダウンロードしてプロジェクトルートに配置し、下記のように利用する。
 
 ```
-# template
-sqlite3def --file=<sql_file_path> <db_name>
+# get current scheme
+./sqlite3def  data/rent-picker.sqlite3 --export
 
-# example
+# apply scheme file (dry run)
+./sqlite3def --file=sql-ddl/create_table_room_header.sql data/rent-picker.sqlite3 --dry-run
+
+# apply scheme file
 ./sqlite3def --file=sql-ddl/create_table_room_header.sql data/rent-picker.sqlite3
+
+
 ```
 
 
