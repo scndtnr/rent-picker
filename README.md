@@ -16,16 +16,16 @@ Rustで賃貸情報をスクレイピングし、Pythonで機械学習させて�
 └──  sqlite3def.exe
 ```
 
-`web-scraping` では、Rustを用いて住宅情報サイトから賃貸情報を取得し、DBに保存する。
-`machine-learning` では、Pythonを用いてDBのデータを読み出し、LightGBMにて学習と推論を行う。
-`sql-ddl` では、sqldef (sqlite3def.exe) で扱うデータベースのテーブル定義ファイル (DDL) を管理する。
-`litestream` では、SQLiteファイルをS3/GCSにレプリケーションするための設定ファイルを管理する。
-`docker-compose.yml` では、litestreamコンテナとアプリケーションコンテナの設定をする。
+`web-scraping` では、Rustを用いて住宅情報サイトから賃貸情報を取得し、DBに保存する。  
+`machine-learning` では、Pythonを用いてDBのデータを読み出し、LightGBMにて学習と推論を行う。  
+`sql-ddl` では、sqldef (sqlite3def.exe) で扱うデータベースのテーブル定義ファイル (DDL) を管理する。  
+`litestream` では、SQLiteファイルをS3/GCSにレプリケーションするための設定ファイルを管理する。  
+`docker-compose.yml` では、litestreamコンテナとアプリケーションコンテナの設定をする。  
 
 
 ### `web-scraping` (Rust)
 
-レイヤードアーキテクチャで作成し、当面はバイナリクレート`cui`から利用する。
+レイヤードアーキテクチャで作成し、当面はバイナリクレート`cui`から利用する。  
 いずれは[pyo3](https://github.com/PyO3/pyo3)を利用してPythonから呼び出せるようにしたい。
 
 - domain  : モデル定義やrepositoryのtraitを書く
@@ -43,10 +43,10 @@ Rustで賃貸情報をスクレイピングし、Pythonで機械学習させて�
 
 ### `sql-ddl` (sqldef によるスキーマ管理)
 
-[k0kubun/sqldef](https://github.com/k0kubun/sqldef)で利用するためのDDLを置く。
+[k0kubun/sqldef](https://github.com/k0kubun/sqldef)で利用するためのDDLを置く。  
 sqldef のバイナリは[リリースページ](https://github.com/k0kubun/sqldef/releases)からダウンロードしてプロジェクトルートに配置し利用する。
 
-なお、ローカルファイルを対象とする場合は下記の通りにすればよいが、
+なお、ローカルファイルを対象とする場合は下記の通りにすればよいが、  
 litestreamを利用する場合は、事前にDockerコンテナを立ち上げておくこと。
 
 ```
@@ -62,7 +62,7 @@ litestreamを利用する場合は、事前にDockerコンテナを立ち上げ�
 
 ### `litestream` (SQLite利用時にクラウドへレプリケーションを行う)
 
-Dockerコンテナ経由でlitestreamを扱い、sqliteファイルをS3やGCSにレプリケーションする。
+Dockerコンテナ経由でlitestreamを扱い、sqliteファイルをS3やGCSにレプリケーションする。  
 基本的な操作は docker-compose.yml のコマンドに設定しておくが、手動で状況確認したい時は下記のように利用する。
 
 ```sh
@@ -81,8 +81,8 @@ docker-compose -f docker-compose.yml down
 
 ### `docker-compose.yml` 
 
-スクレイピング処理をVMインスタンス上で実行するために追加した。
-litestreamコンテナ2つとアプリケーションコンテナを立ち上げるサイドカー構成にしている。
+スクレイピング処理をVMインスタンス上で実行するために追加した。  
+litestreamコンテナ2つとアプリケーションコンテナを立ち上げるサイドカー構成にしている。  
 
 利用方法は下記の通り （`litestream`欄と一部重複している）
 
