@@ -1,3 +1,7 @@
+mod value_enum;
+
+pub(crate) use value_enum::{Area, DataAction, Service, Table, TableType};
+
 /// コマンドライン引数のパース用構造体
 #[derive(Debug, Clone, clap::Parser, PartialEq, Eq, PartialOrd, Ord)]
 #[clap(
@@ -53,67 +57,4 @@ pub(super) struct ReadDb {
     pub(super) table: Table,
     #[arg(long, value_enum, default_value_t=TableType::Main, help = "selectしたいテーブルの種類を指定する")]
     pub(super) table_type: TableType,
-}
-
-#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum Service {
-    Suumo,
-}
-
-#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum DataAction {
-    Summary,
-    Top,
-    Export,
-}
-
-#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum Table {
-    Room,
-    RoomHeader,
-}
-
-impl std::fmt::Display for Table {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Table::Room => write!(f, "Room"),
-            Table::RoomHeader => write!(f, "RoomHeader"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum TableType {
-    Main,
-    Load,
-    Temp,
-}
-
-impl std::fmt::Display for TableType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            TableType::Main => write!(f, "Main"),
-            TableType::Load => write!(f, "Load"),
-            TableType::Temp => write!(f, "Temp"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, clap::ValueEnum, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) enum Area {
-    Tokyo,
-    Kanagawa,
-    Saitama,
-    Chiba,
-}
-
-impl std::fmt::Display for Area {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Area::Tokyo => write!(f, "Tokyo"),
-            Area::Kanagawa => write!(f, "Kanagawa"),
-            Area::Saitama => write!(f, "Saitama"),
-            Area::Chiba => write!(f, "Chiba"),
-        }
-    }
 }
