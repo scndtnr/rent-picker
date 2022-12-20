@@ -32,7 +32,7 @@ impl Cui {
     #[tracing::instrument(skip_all)]
     pub(super) async fn process_cmd(&self) {
         match &self.opts.task {
-            Task::HealthCheck(args) => match args.target {
+            Task::HealthCheck(args) => match args.service {
                 Service::Suumo => self.process_health_check_suumo().await,
             },
             Task::Web(args) => match args.service {
