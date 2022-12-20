@@ -17,6 +17,9 @@ services:
     entrypoint: /bin/sh
     command: [-c, "
       rm -f /data/rent-picker.sqlite3 &&
+      rm -f /data/rent-picker.sqlite3-shm &&
+      rm -f /data/rent-picker.sqlite3-wal &&
+      rm -rf /data/.rent-picker.sqlite3-litestream &&
       /usr/local/bin/litestream restore -config /opt/litestream/litestream.yaml /data/rent-picker.sqlite3
       "]
 
