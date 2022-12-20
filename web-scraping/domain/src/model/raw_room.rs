@@ -3,7 +3,7 @@ use derive_new::new;
 
 #[allow(clippy::too_many_arguments)]
 #[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct RoomRaw {
+pub struct RawRoom {
     /// 詳細ページのURL
     url: String,
     /// suumo物件コード
@@ -72,7 +72,7 @@ pub struct RoomRaw {
     scraping_date: DateTime<FixedOffset>,
 }
 
-impl RoomRaw {
+impl RawRoom {
     pub fn url(&self) -> &str {
         &self.url
     }

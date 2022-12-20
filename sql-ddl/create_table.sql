@@ -85,10 +85,10 @@ CREATE TABLE temp_room_header (
     scraping_date  DATETIME
 );
 
-/* --------- room_raw ------------- */
+/* --------- raw_room ------------- */
 
--- DROP TABLE room_raw;
-CREATE TABLE room_raw (
+-- DROP TABLE raw_room;
+CREATE TABLE raw_room (
     -- 詳細ページのURL
     url VARCHAR NOT NULL,
     -- suumo物件コード
@@ -160,8 +160,8 @@ CREATE TABLE room_raw (
     PRIMARY KEY (url)
 );
 
--- DROP TABLE load_room_raw;
-CREATE TABLE load_room_raw (
+-- DROP TABLE load_raw_room;
+CREATE TABLE load_raw_room (
     url VARCHAR NOT NULL,
     suumo_code VARCHAR,
     building_name VARCHAR,
@@ -197,8 +197,8 @@ CREATE TABLE load_room_raw (
     scraping_date DATETIME
 );
 
--- DROP TABLE temp_room_raw;
-CREATE TABLE temp_room_raw (
+-- DROP TABLE temp_raw_room;
+CREATE TABLE temp_raw_room (
     url VARCHAR NOT NULL,
     suumo_code VARCHAR,
     building_name VARCHAR,

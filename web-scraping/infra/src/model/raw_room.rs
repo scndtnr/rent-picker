@@ -1,8 +1,8 @@
-use domain::model::{Jst, RoomRaw};
+use domain::model::{Jst, RawRoom};
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 
 #[derive(FromRow, Debug)]
-pub struct RoomRawRecord {
+pub struct RawRoomRecord {
     pub url: String,
     pub suumo_code: String,
     pub building_name: String,
@@ -38,8 +38,8 @@ pub struct RoomRawRecord {
     pub scraping_date: NaiveDateTime,
 }
 
-impl From<RoomRaw> for RoomRawRecord {
-    fn from(room: RoomRaw) -> Self {
+impl From<RawRoom> for RawRoomRecord {
+    fn from(room: RawRoom) -> Self {
         Self {
             url: room.url().to_string(),
             suumo_code: room.suumo_code().to_string(),
@@ -78,9 +78,9 @@ impl From<RoomRaw> for RoomRawRecord {
     }
 }
 
-impl TryFrom<RoomRawRecord> for RoomRaw {
+impl TryFrom<RawRoomRecord> for RawRoom {
     type Error = anyhow::Error;
-    fn try_from(record: RoomRawRecord) -> Result<Self, Self::Error> {
+    fn try_from(record: RawRoomRecord) -> Result<Self, Self::Error> {
         Ok(Self::new(
             record.url,
             record.suumo_code,

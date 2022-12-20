@@ -1,9 +1,9 @@
 mod as_vec;
 mod jst;
+mod raw_room;
 mod room;
 mod room_header;
 mod room_headers;
-mod room_raw;
 mod room_sanitize;
 mod rooms;
 mod table_name;
@@ -12,10 +12,10 @@ mod target_area;
 
 pub use as_vec::AsVec;
 pub use jst::Jst;
+pub use raw_room::RawRoom;
 pub use room::Room;
 pub use room_header::RoomHeader;
 pub use room_headers::RoomHeaders;
-pub use room_raw::RoomRaw;
 pub use room_sanitize::RoomSanitize;
 pub use rooms::Rooms;
 pub use table_name::TableName;

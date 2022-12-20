@@ -1,9 +1,9 @@
-use super::{RoomHeader, RoomRaw, RoomSanitize};
+use super::{RawRoom, RoomHeader, RoomSanitize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Room {
     header: RoomHeader,
-    raw: Option<RoomRaw>,
+    raw: Option<RawRoom>,
     sanitize: Option<RoomSanitize>,
 }
 
@@ -21,7 +21,7 @@ impl Room {
             sanitize: None,
         }
     }
-    pub fn set_raw(&mut self, raw: RoomRaw) {
+    pub fn set_raw(&mut self, raw: RawRoom) {
         self.raw = Some(raw)
     }
     pub fn set_sanitize(&mut self, sanitize: RoomSanitize) {
@@ -32,7 +32,7 @@ impl Room {
         &self.header
     }
 
-    pub fn raw(&self) -> &Option<RoomRaw> {
+    pub fn raw(&self) -> &Option<RawRoom> {
         &self.raw
     }
 
