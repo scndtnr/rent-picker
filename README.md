@@ -36,10 +36,10 @@ sqldef のバイナリは[リリースページ](https://github.com/k0kubun/sqld
 ./sqlite3def  data/rent-picker.sqlite3 --export
 
 # apply scheme file (dry run)
-./sqlite3def --file=sql-ddl/create_table_room_header.sql data/rent-picker.sqlite3 --dry-run
+./sqlite3def --file=sql-ddl/create_table.sql data/rent-picker.sqlite3 --dry-run
 
 # apply scheme file
-./sqlite3def --file=sql-ddl/create_table_room_header.sql data/rent-picker.sqlite3
+./sqlite3def --file=sql-ddl/create_table.sql data/rent-picker.sqlite3
 
 
 ```
