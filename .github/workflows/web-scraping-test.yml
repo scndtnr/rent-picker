@@ -1,11 +1,12 @@
 name: web-scraping-test
+
 on:
   push:
     branches:
       - 'develop'
     paths:
       # if web-scraping file not changed, do not trigger build job.
-      - 'web-scraping/*'
+      - 'web-scraping/**'
       - '.github/workflows/web-scraping-*.yml'
 
 jobs:
