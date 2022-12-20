@@ -70,10 +70,10 @@ Dockerコンテナ経由でlitestreamを扱い、sqliteファイルをS3やGCS�
 docker-compose -f docker-compose.yml up -d
 
 # restore処理は重いので、data配下の様子を見ながら数分待つ。
-docker exec -it rent-picker_sqlite-backup_1 ls -al /data
+docker exec -it rent-picker-sqlite-backup-1 ls -al /data
 
 # generation 一覧を表示する
-docker exec -it rent-picker_sqlite-backup_1 litestream generations -config /opt/litestream/litestream.yaml /data/rent-picker.sqlite3
+docker exec -it rent-picker-sqlite-backup-1 litestream generations -config /opt/litestream/litestream.yaml /data/rent-picker.sqlite3
 
 # 作業が終わったらコンテナを削除する
 docker-compose -f docker-compose.yml down
@@ -91,7 +91,7 @@ litestreamコンテナ2つとアプリケーションコンテナを立ち上げ
 docker-compose -f docker-compose.yml up -d
 
 # restore処理は重いので、data配下の様子を見ながら数分待つ。
-docker exec -it rent-picker_sqlite-backup_1 ls -al /data
+docker exec -it rent-picker-sqlite-backup-1 ls -al /data
 
 # health-check
 docker exec -t rent-picker-web-scraping-1 /usr/local/bin/cui health-check | bunyan
