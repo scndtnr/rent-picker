@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use url::Url;
 
-use crate::model::{RoomHeaders, Rooms, TargetArea};
+use crate::model::{RawRooms, RoomHeaders, TargetArea};
 
 #[cfg_attr(feature = "mock", mockall::automock(type Crawler=();))]
 #[async_trait::async_trait]
@@ -33,10 +33,6 @@ pub trait SuumoRepository {
         station: &str,
     ) -> Result<RoomHeaders>;
 
-    /// RoomHeadersから、賃貸の詳細情報を取得する
-    async fn rooms_by_room_headers(
-        &self,
-        crawler: &Self::Crawler,
-        headers: &RoomHeaders,
-    ) -> Result<Rooms>;
+    /// 各詳細ページのURLから、賃貸の詳細情報を取得する
+    async fn raw_rooms(&self, crawler: &Self::Crawler, urls: Vec<Url>) -> Result<RawRooms>;
 }

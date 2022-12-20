@@ -1,4 +1,4 @@
-use domain::model::{RoomHeaders, Rooms};
+use domain::model::{RawRooms, RoomHeaders};
 use usecase::Usecases;
 
 use crate::dto::{ReadDbRequestDto, SuumoRequestDto};
@@ -21,10 +21,10 @@ impl<U: Usecases> Controller<U> {
             .expect("Fail to health check of suumo.");
     }
 
-    pub async fn scrape_rooms_from_suumo(&self, dto: SuumoRequestDto) -> Rooms {
+    pub async fn scrape_raw_rooms_from_suumo(&self, dto: SuumoRequestDto) -> RawRooms {
         self.usecases
-            .scrape_rooms_usecase()
-            .scrape_rooms_from_suumo(
+            .scrape_raw_rooms_usecase()
+            .scrape_raw_rooms_from_suumo(
                 dto.area.try_into().expect("Fail to convert target area."),
                 &dto.station,
                 dto.save,

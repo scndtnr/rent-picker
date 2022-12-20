@@ -1,7 +1,7 @@
 use super::{selector, SearchQueryParams, SortType, Transfers};
 use crate::repository::{crawler::HttpClient, HtmlParser};
 use anyhow::{bail, Context, Result};
-use domain::model::{Jst, RoomHeader, RoomHeaders, Rooms, TargetArea};
+use domain::model::{Jst, RawRoom, RoomHeader, RoomHeaders, TargetArea};
 use reqwest::Url;
 use usecase::env::get_env_var;
 
@@ -230,7 +230,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[allow(unused_variables)]
     #[tracing::instrument(level = "trace", skip_all, err(Debug))]
-    async fn rooms_in_detail_page(&self, headers: RoomHeaders) -> Result<Rooms> {
+    async fn raw_room_in_detail_page(&self, url: Url) -> Result<RawRoom> {
         todo!();
     }
 }

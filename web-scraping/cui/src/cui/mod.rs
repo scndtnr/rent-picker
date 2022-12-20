@@ -66,7 +66,7 @@ impl Cui {
             args.dry_run,
         );
 
-        let _res = self.controller.scrape_rooms_from_suumo(dto).await;
+        let _res = self.controller.scrape_raw_rooms_from_suumo(dto).await;
 
         // 結果表示
         // todo!("DTOを表示する形に修正する")

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use domain::{
-    model::{AsVec, RoomHeader, RoomHeaders, Rooms, TargetArea},
+    model::{AsVec, RawRooms, RoomHeader, RoomHeaders, TargetArea},
     repository::SuumoRepository,
 };
 use futures::{stream, StreamExt, TryStreamExt};
@@ -111,13 +111,8 @@ impl SuumoRepository for SuumoRepositoryImpl {
         Ok(room_headers)
     }
 
-    /// RoomHeadersから、賃貸の詳細情報を取得する
-    #[allow(unused_variables)]
-    async fn rooms_by_room_headers(
-        &self,
-        crawler: &Self::Crawler,
-        headers: &RoomHeaders,
-    ) -> Result<Rooms> {
-        todo!();
+    /// 各詳細ページのURLから、賃貸の詳細情報を取得する
+    async fn raw_rooms(&self, crawler: &Self::Crawler, urls: Vec<Url>) -> Result<RawRooms> {
+        todo!()
     }
 }
