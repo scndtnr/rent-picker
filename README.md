@@ -97,10 +97,10 @@ docker exec -it rent-picker-sqlite-backup-1 ls -al /data
 docker exec -t rent-picker-web-scraping-1 /usr/local/bin/cui health-check | bunyan
 
 # read-db (temp_room_headerテーブルのサマリ出力)
-docker exec -t rent-picker-web-scraping-1 /usr/local/bin/cui read-db --action summary --table room-header --table-type temp | bunyan
+docker exec -t rent-picker-web-scraping-1 /usr/local/bin/cui db --action summary --table room-header --table-type temp | bunyan
 
 # scraping (1ページのみ、標準出力はINFO以上に限る)
-docker exec -t --env MAX_PAGE=1 --env LOG_LEVEL="INFO" rent-picker-web-scraping-1 /usr/local/bin/cui web-scrape --area tokyo 新宿 --save | bunyan
+docker exec -t --env MAX_PAGE=1 --env LOG_LEVEL="INFO" rent-picker-web-scraping-1 /usr/local/bin/cui web room-header --area tokyo 新宿 --save | bunyan
 
 # 作業が終わったらコンテナを削除する
 docker-compose -f docker-compose.yml down
