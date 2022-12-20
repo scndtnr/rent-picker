@@ -72,12 +72,6 @@ impl SuumoRepository for SuumoRepositoryImpl {
     ) -> Result<RoomHeaders> {
         // 各賃貸一覧ページから住居情報や詳細ページへのURLを取得する
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
-        let max_page = get_usize_of_env_var("MAX_PAGE");
-        let urls = if urls.len() <= (max_page) {
-            urls
-        } else {
-            urls[0..max_page].to_vec()
-        };
 
         // プログレスバーの準備
         let pb_urls = new_progress_bar(urls.len() as u64).await;
