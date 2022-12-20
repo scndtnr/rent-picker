@@ -12,8 +12,6 @@ pub(crate) struct Web {
     pub(crate) station: String,
     #[arg(long, help = "取得データをデータベースに保存するboolフラグ")]
     pub(crate) save: bool,
-    #[arg(long, help = "ヘッダ情報はデータベースから読む出すboolフラグ")]
-    pub(crate) headers_from_database: bool,
     #[arg(long, help = "各ページのスクレイピングはスキップするboolフラグ")]
     pub(crate) dry_run: bool,
 }

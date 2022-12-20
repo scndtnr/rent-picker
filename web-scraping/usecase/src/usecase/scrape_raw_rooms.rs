@@ -24,7 +24,6 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
         area: TargetArea,
         station: &str,
         save: bool,
-        headers_from_database: bool,
     ) -> Result<RawRooms> {
         todo!()
     }

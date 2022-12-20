@@ -62,7 +62,6 @@ impl Cui {
             args.area.to_string(),
             args.station.clone(),
             args.save,
-            args.headers_from_database,
             args.dry_run,
         );
 
@@ -80,7 +79,6 @@ impl Cui {
             args.area.to_string(),
             args.station.clone(),
             args.save,
-            args.headers_from_database,
             args.dry_run,
         );
 
