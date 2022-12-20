@@ -1,6 +1,7 @@
 mod as_vec;
 mod jst;
 mod raw_room;
+mod raw_rooms;
 mod room;
 mod room_header;
 mod room_headers;
@@ -13,6 +14,7 @@ mod target_area;
 pub use as_vec::AsVec;
 pub use jst::Jst;
 pub use raw_room::RawRoom;
+pub use raw_rooms::RawRooms;
 pub use room::Room;
 pub use room_header::RoomHeader;
 pub use room_headers::RoomHeaders;
