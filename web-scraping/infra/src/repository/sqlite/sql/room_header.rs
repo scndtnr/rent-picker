@@ -16,35 +16,35 @@ pub fn select_group_by_pk(table: TableType) -> String {
         "
         SELECT
             t.url
-            ,t.residence_title
-            ,t.residence_address
-            ,t.residence_nearest_station
-            ,t.residence_age
-            ,t.residence_floors
-            ,t.residence_transfer
-            ,t.residence_area
-            ,t.residence_station
-            ,t.room_floor
-            ,t.room_rent_price
-            ,t.room_condo_fee
-            ,t.room_deposit
-            ,t.room_key_money
-            ,t.room_layout
-            ,t.room_exclusive_area
-            ,t.created_at
+            ,t.building_name
+            ,t.location
+            ,t.walk_to_station
+            ,t.age_in_years
+            ,t.number_of_floors
+            ,t.transfer_in_search_result
+            ,t.area_of_search_condition
+            ,t.commute_station_of_search_condition
+            ,t.floor
+            ,t.rental_fee
+            ,t.management_fee
+            ,t.security_deposit
+            ,t.key_money
+            ,t.floor_plan
+            ,t.private_area
+            ,t.scraping_date
         FROM
             {} t
             JOIN (
                 SELECT
                     url,
-                    max(created_at) max_created_at
+                    max(scraping_date) max_scraping_date
                 FROM
                     {}
                 GROUP BY
                     url
             ) g
                 ON t.url = g.url
-                AND t.created_at = g.max_created_at
+                AND t.scraping_date = g.max_scraping_date
         ",
         table, table
     )
@@ -58,22 +58,22 @@ pub fn insert_all_header(table: TableType) -> String {
         INSERT INTO {}
             (
                 url
-                ,residence_title
-                ,residence_address
-                ,residence_nearest_station
-                ,residence_age
-                ,residence_floors
-                ,residence_transfer
-                ,residence_area
-                ,residence_station
-                ,room_floor
-                ,room_rent_price
-                ,room_condo_fee
-                ,room_deposit
-                ,room_key_money
-                ,room_layout
-                ,room_exclusive_area
-                ,created_at
+                ,building_name
+                ,location
+                ,walk_to_station
+                ,age_in_years
+                ,number_of_floors
+                ,transfer_in_search_result
+                ,area_of_search_condition
+                ,commute_station_of_search_condition
+                ,floor
+                ,rental_fee
+                ,management_fee
+                ,security_deposit
+                ,key_money
+                ,floor_plan
+                ,private_area
+                ,scraping_date
             )
     ",
         table

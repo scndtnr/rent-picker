@@ -6,15 +6,15 @@ pub fn group_by_area_and_station(table: &TableType) -> String {
     format!(
         "
         SELECT 
-            residence_area ,
-            residence_station, 
+            area_of_search_condition ,
+            commute_station_of_search_condition, 
             count(*) as record_count,
             round((count(*) * 1.2) /3600, 2) as estimated_hour_for_scraping 
         FROM 
             {}
         GROUP BY
-            residence_area ,
-            residence_station
+            area_of_search_condition ,
+            commute_station_of_search_condition
         ",
         table
     )

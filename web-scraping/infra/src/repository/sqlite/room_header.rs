@@ -66,29 +66,29 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     }
 
     /// データを1件insertする。
-    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), title=source.residence_title(), table=table.to_string()), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), building_name=source.building_name(), table=table.to_string()), err(Debug))]
     async fn insert(&self, source: &RoomHeader, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderRecord = source.clone().into();
         let sql = sql::room_header::insert_all_column(table);
         let _ = sqlx::query(&sql)
             .bind(dto.url)
-            .bind(dto.residence_title)
-            .bind(dto.residence_address)
-            .bind(dto.residence_nearest_station)
-            .bind(dto.residence_age)
-            .bind(dto.residence_floors)
-            .bind(dto.residence_transfer)
-            .bind(dto.residence_area)
-            .bind(dto.residence_station)
-            .bind(dto.room_floor)
-            .bind(dto.room_rent_price)
-            .bind(dto.room_condo_fee)
-            .bind(dto.room_deposit)
-            .bind(dto.room_key_money)
-            .bind(dto.room_layout)
-            .bind(dto.room_exclusive_area)
-            .bind(dto.created_at)
+            .bind(dto.building_name)
+            .bind(dto.location)
+            .bind(dto.walk_to_station)
+            .bind(dto.age_in_years)
+            .bind(dto.number_of_floors)
+            .bind(dto.transfer_in_search_result)
+            .bind(dto.area_of_search_condition)
+            .bind(dto.commute_station_of_search_condition)
+            .bind(dto.floor)
+            .bind(dto.rental_fee)
+            .bind(dto.management_fee)
+            .bind(dto.security_deposit)
+            .bind(dto.key_money)
+            .bind(dto.floor_plan)
+            .bind(dto.private_area)
+            .bind(dto.scraping_date)
             .execute(&*pool)
             .await?;
         Ok(())
@@ -152,22 +152,22 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
                     QueryBuilder::new(sql::room_header::insert_all_header(table.clone()));
                 query_builder.push_values(headers, |mut b, header| {
                     b.push_bind(header.url.clone())
-                        .push_bind(header.residence_title.clone())
-                        .push_bind(header.residence_address.clone())
-                        .push_bind(header.residence_nearest_station.clone())
-                        .push_bind(header.residence_age.clone())
-                        .push_bind(header.residence_floors.clone())
-                        .push_bind(header.residence_transfer.clone())
-                        .push_bind(header.residence_area.clone())
-                        .push_bind(header.residence_station.clone())
-                        .push_bind(header.room_floor.clone())
-                        .push_bind(header.room_rent_price.clone())
-                        .push_bind(header.room_condo_fee.clone())
-                        .push_bind(header.room_deposit.clone())
-                        .push_bind(header.room_key_money.clone())
-                        .push_bind(header.room_layout.clone())
-                        .push_bind(header.room_exclusive_area.clone())
-                        .push_bind(header.created_at);
+                        .push_bind(header.building_name.clone())
+                        .push_bind(header.location.clone())
+                        .push_bind(header.walk_to_station.clone())
+                        .push_bind(header.age_in_years.clone())
+                        .push_bind(header.number_of_floors.clone())
+                        .push_bind(header.transfer_in_search_result.clone())
+                        .push_bind(header.area_of_search_condition.clone())
+                        .push_bind(header.commute_station_of_search_condition.clone())
+                        .push_bind(header.floor.clone())
+                        .push_bind(header.rental_fee.clone())
+                        .push_bind(header.management_fee.clone())
+                        .push_bind(header.security_deposit.clone())
+                        .push_bind(header.key_money.clone())
+                        .push_bind(header.floor_plan.clone())
+                        .push_bind(header.private_area.clone())
+                        .push_bind(header.scraping_date);
                 });
                 query_builder
             })
@@ -216,7 +216,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         Ok(())
     }
 
-    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), title=source.residence_title(), table=table.to_string()), err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), building_name=source.building_name(), table=table.to_string()), err(Debug))]
     async fn delete_by_pk(&self, source: &RoomHeader, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
         let dto: RoomHeaderRecord = source.clone().into();

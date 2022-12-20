@@ -17,8 +17,8 @@ impl From<Vec<RoomHeaderSummaryRecord>> for RoomHeaderSummaryTable {
 
 #[derive(FromRow, Debug)]
 pub struct RoomHeaderSummaryRecord {
-    pub residence_area: String,
-    pub residence_station: String,
+    pub area_of_search_condition: String,
+    pub commute_station_of_search_condition: String,
     pub record_count: u32,
     pub estimated_hour_for_scraping: f32,
 }

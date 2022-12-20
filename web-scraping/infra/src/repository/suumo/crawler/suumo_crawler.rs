@@ -113,34 +113,34 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                 .into_iter()
                 .flat_map(|element| {
                     // 住居情報を取得する
-                    let residence_title = self.find_inner_text_by_element(
+                    let building_name = self.find_inner_text_by_element(
                         &element,
-                        selector::room_header::residence_title().as_str(),
+                        selector::room_header::building_name().as_str(),
                         ",",
                     );
-                    let residence_address = self.find_inner_text_by_element(
+                    let location = self.find_inner_text_by_element(
                         &element,
-                        selector::room_header::residence_address().as_str(),
+                        selector::room_header::location().as_str(),
                         "\n",
                     );
-                    let residence_nearest_station = self.find_inner_text_by_element(
+                    let walk_to_station = self.find_inner_text_by_element(
                         &element,
-                        selector::room_header::residence_nearest_station().as_str(),
+                        selector::room_header::walk_to_station().as_str(),
                         "\n",
                     );
-                    let residence_age = self.find_inner_text_by_element(
+                    let age_in_years = self.find_inner_text_by_element(
                         &element,
-                        selector::room_header::residence_age().as_str(),
+                        selector::room_header::age_in_years().as_str(),
                         "\n",
                     );
-                    let residence_floors = self.find_inner_text_by_element(
+                    let number_of_floors = self.find_inner_text_by_element(
                         &element,
-                        selector::room_header::residence_floors().as_str(),
+                        selector::room_header::number_of_floors().as_str(),
                         "\n",
                     );
-                    let residence_transfer = self.find_inner_text_by_element(
+                    let transfer_in_search_result = self.find_inner_text_by_element(
                         &element,
-                        selector::room_header::residence_transfer().as_str(),
+                        selector::room_header::transfer_in_search_result().as_str(),
                         "\n",
                     );
 
@@ -166,19 +166,19 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                                 selector::room_header::room_floor().as_str(),
                                 "\n",
                             );
-                            let room_rent_price = self.find_inner_text_by_element(
+                            let room_rental_fee = self.find_inner_text_by_element(
                                 &room,
-                                selector::room_header::room_rent_price().as_str(),
+                                selector::room_header::room_rental_fee().as_str(),
                                 "\n",
                             );
-                            let room_condo_fee = self.find_inner_text_by_element(
+                            let room_management_fee = self.find_inner_text_by_element(
                                 &room,
-                                selector::room_header::room_condo_fee().as_str(),
+                                selector::room_header::room_management_fee().as_str(),
                                 "\n",
                             );
-                            let room_deposit = self.find_inner_text_by_element(
+                            let room_security_deposit = self.find_inner_text_by_element(
                                 &room,
-                                selector::room_header::room_deposit().as_str(),
+                                selector::room_header::room_security_deposit().as_str(),
                                 "\n",
                             );
                             let room_key_money = self.find_inner_text_by_element(
@@ -186,34 +186,34 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                                 selector::room_header::room_key_money().as_str(),
                                 "\n",
                             );
-                            let room_layout = self.find_inner_text_by_element(
+                            let room_floor_plan = self.find_inner_text_by_element(
                                 &room,
-                                selector::room_header::room_layout().as_str(),
+                                selector::room_header::room_floor_plan().as_str(),
                                 "\n",
                             );
-                            let room_exclusive_area = self.find_inner_text_by_element(
+                            let room_private_area = self.find_inner_text_by_element(
                                 &room,
-                                selector::room_header::room_exclusive_area().as_str(),
+                                selector::room_header::room_private_area().as_str(),
                                 "^",
                             );
 
                             RoomHeader::new(
                                 url,
-                                residence_title.clone(),
-                                residence_address.clone(),
-                                residence_nearest_station.clone(),
-                                residence_age.clone(),
-                                residence_floors.clone(),
-                                residence_transfer.clone(),
+                                building_name.clone(),
+                                location.clone(),
+                                walk_to_station.clone(),
+                                age_in_years.clone(),
+                                number_of_floors.clone(),
+                                transfer_in_search_result.clone(),
                                 area.clone(),
                                 station.to_string(),
                                 room_floor,
-                                room_rent_price,
-                                room_condo_fee,
-                                room_deposit,
+                                room_rental_fee,
+                                room_management_fee,
+                                room_security_deposit,
                                 room_key_money,
-                                room_layout,
-                                room_exclusive_area,
+                                room_floor_plan,
+                                room_private_area,
                                 Jst::now(),
                             )
                         })

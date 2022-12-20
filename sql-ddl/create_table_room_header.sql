@@ -2,64 +2,121 @@
 
 -- DROP TABLE room_header;
 CREATE TABLE room_header (
-    url VARCHAR NOT NULL, 
-    residence_title VARCHAR, 
-    residence_address VARCHAR,
-    residence_nearest_station VARCHAR,
-    residence_age VARCHAR,
-    residence_floors VARCHAR,
-    residence_transfer VARCHAR, 
-    residence_area VARCHAR, 
-    residence_station VARCHAR, 
-    room_floor VARCHAR,
-    room_rent_price VARCHAR,
-    room_condo_fee VARCHAR,
-    room_deposit VARCHAR,
-    room_key_money VARCHAR,
-    room_layout VARCHAR,
-    room_exclusive_area VARCHAR,
-    created_at DATETIME, 
+    -- 詳細ページのURL
+    url VARCHAR NOT NULL,
+    -- 建物名
+    building_name VARCHAR,
+    -- 所在地
+    location VARCHAR,
+    -- 駅徒歩
+    walk_to_station VARCHAR,
+    -- 築年数
+    age_in_years VARCHAR,
+    -- 階建
+    number_of_floors VARCHAR,
+    -- 乗換回数（検索結果）
+    transfer_in_search_result VARCHAR,
+    -- 都道府県エリア（検索条件）
+    area_of_search_condition VARCHAR,
+    -- 通勤先の最寄り駅（検索条件）
+    commute_station_of_search_condition VARCHAR,
+    -- 階
+    floor VARCHAR,
+    -- 家賃
+    rental_fee VARCHAR,
+    -- 管理費共益費
+    management_fee VARCHAR,
+    -- 敷金
+    security_deposit VARCHAR,
+    -- 礼金
+    key_money VARCHAR,
+    -- 間取り
+    floor_plan VARCHAR,
+    -- 専有面積
+    private_area VARCHAR,
+    -- スクレイピングした日時
+    scraping_date  DATETIME,
+    ---------------------------------
+    -- PK制約
     PRIMARY KEY (url)
 );
 
 -- DROP TABLE load_room_header;
 CREATE TABLE load_room_header (
-    url VARCHAR NOT NULL, 
-    residence_title VARCHAR, 
-    residence_address VARCHAR,
-    residence_nearest_station VARCHAR,
-    residence_age VARCHAR,
-    residence_floors VARCHAR,
-    residence_transfer VARCHAR, 
-    residence_area VARCHAR, 
-    residence_station VARCHAR, 
-    room_floor VARCHAR,
-    room_rent_price VARCHAR,
-    room_condo_fee VARCHAR,
-    room_deposit VARCHAR,
-    room_key_money VARCHAR,
-    room_layout VARCHAR,
-    room_exclusive_area VARCHAR,
-    created_at DATETIME
+    -- 詳細ページのURL
+    url VARCHAR NOT NULL,
+    -- 建物名
+    building_name VARCHAR,
+    -- 所在地
+    location VARCHAR,
+    -- 駅徒歩
+    walk_to_station VARCHAR,
+    -- 築年数
+    age_in_years VARCHAR,
+    -- 階建
+    number_of_floors VARCHAR,
+    -- 乗換回数（検索結果）
+    transfer_in_search_result VARCHAR,
+    -- 都道府県エリア（検索条件）
+    area_of_search_condition VARCHAR,
+    -- 通勤先の最寄り駅（検索条件）
+    commute_station_of_search_condition VARCHAR,
+    -- 階
+    floor VARCHAR,
+    -- 家賃
+    rental_fee VARCHAR,
+    -- 管理費共益費
+    management_fee VARCHAR,
+    -- 敷金
+    security_deposit VARCHAR,
+    -- 礼金
+    key_money VARCHAR,
+    -- 間取り
+    floor_plan VARCHAR,
+    -- 専有面積
+    private_area VARCHAR,
+    -- スクレイピングした日時
+    scraping_date  DATETIME
 );
 
 -- DROP TABLE temp_room_header;
 CREATE TABLE temp_room_header (
-    url VARCHAR NOT NULL, 
-    residence_title VARCHAR, 
-    residence_address VARCHAR,
-    residence_nearest_station VARCHAR,
-    residence_age VARCHAR,
-    residence_floors VARCHAR,
-    residence_transfer VARCHAR, 
-    residence_area VARCHAR, 
-    residence_station VARCHAR, 
-    room_floor VARCHAR,
-    room_rent_price VARCHAR,
-    room_condo_fee VARCHAR,
-    room_deposit VARCHAR,
-    room_key_money VARCHAR,
-    room_layout VARCHAR,
-    room_exclusive_area VARCHAR,
-    created_at DATETIME
+    -- 詳細ページのURL
+    url VARCHAR NOT NULL,
+    -- 建物名
+    building_name VARCHAR,
+    -- 所在地
+    location VARCHAR,
+    -- 駅徒歩
+    walk_to_station VARCHAR,
+    -- 築年数
+    age_in_years VARCHAR,
+    -- 階建
+    number_of_floors VARCHAR,
+    -- 乗換回数（検索結果）
+    transfer_in_search_result VARCHAR,
+    -- 都道府県エリア（検索条件）
+    area_of_search_condition VARCHAR,
+    -- 通勤先の最寄り駅（検索条件）
+    commute_station_of_search_condition VARCHAR,
+    -- 階
+    floor VARCHAR,
+    -- 家賃
+    rental_fee VARCHAR,
+    -- 管理費共益費
+    management_fee VARCHAR,
+    -- 敷金
+    security_deposit VARCHAR,
+    -- 礼金
+    key_money VARCHAR,
+    -- 間取り
+    floor_plan VARCHAR,
+    -- 専有面積
+    private_area VARCHAR,
+    -- スクレイピングした日時
+    scraping_date  DATETIME
 );
+
+-- litestream に自動生成されるテーブル
+CREATE TABLE _litestream_seq (id INTEGER PRIMARY KEY, seq INTEGER);
+CREATE TABLE _litestream_lock (id INTEGER);
