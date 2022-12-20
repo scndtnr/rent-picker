@@ -1,7 +1,11 @@
 mod sub_command;
 mod value_enum;
 
-pub(crate) use sub_command::{Db, HealthCheck, Web};
+pub(crate) use sub_command::{
+    db::Db,
+    health_check::HealthCheck,
+    web::{self, Web},
+};
 pub(crate) use value_enum::{Area, DataAction, Service, Table, TableType};
 
 /// コマンドライン引数のパース用構造体

@@ -22,8 +22,8 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
     pub async fn scrape_raw_rooms_from_suumo(
         &self,
         area: TargetArea,
-        station: &str,
         save: bool,
+        dry_run: bool,
     ) -> Result<RawRooms> {
         todo!()
     }

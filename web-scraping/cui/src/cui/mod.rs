@@ -1,8 +1,11 @@
 mod options;
 
-use self::options::{DataAction, Db, Options, Service, Table, Task, Web};
+use self::options::{
+    web::{RawRoom, RoomHeader, TargetPage},
+    DataAction, Db, Options, Service, Task, Web,
+};
 use adapter::{
-    dto::{ReadDbRequestDto, SuumoRequestDto},
+    dto::{ReadDbRequestDto, ScrapeSuumoRawRoomParamsDto, ScrapeSuumoRoomHeaderParamsDto},
     Controller,
 };
 use clap::Parser;
@@ -33,9 +36,13 @@ impl Cui {
                 Service::Suumo => self.process_health_check_suumo().await,
             },
             Task::Web(args) => match args.service {
-                Service::Suumo => match args.table {
-                    Table::RawRoom => self.process_scrape_suumo_raw_rooms(args).await,
-                    Table::RoomHeader => self.process_scrape_suumo_room_headers(args).await,
+                Service::Suumo => match &args.target_page {
+                    TargetPage::RoomHeader(params) => {
+                        self.process_scrape_suumo_room_headers(args, params).await
+                    }
+                    TargetPage::RawRoom(params) => {
+                        self.process_scrape_suumo_raw_rooms(args, params).await
+                    }
                 },
             },
             Task::Db(args) => match args.action {
@@ -56,16 +63,16 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_scrape_suumo_raw_rooms(&self, args: &Web) {
+    async fn process_scrape_suumo_room_headers(&self, args: &Web, params: &RoomHeader) {
         tracing::debug!("web_scrape args : {:#?}", args);
-        let dto = SuumoRequestDto::new(
-            args.area.to_string(),
-            args.station.clone(),
-            args.save,
-            args.dry_run,
+        let dto = ScrapeSuumoRoomHeaderParamsDto::new(
+            params.area.to_string(),
+            params.station.clone(),
+            params.save,
+            params.dry_run,
         );
 
-        let _res = self.controller.scrape_raw_rooms_from_suumo(dto).await;
+        let _res = self.controller.scrape_room_headers_from_suumo(dto).await;
 
         // 結果表示
         // todo!("DTOを表示する形に修正する")
@@ -73,16 +80,12 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_scrape_suumo_room_headers(&self, args: &Web) {
+    async fn process_scrape_suumo_raw_rooms(&self, args: &Web, params: &RawRoom) {
         tracing::debug!("web_scrape args : {:#?}", args);
-        let dto = SuumoRequestDto::new(
-            args.area.to_string(),
-            args.station.clone(),
-            args.save,
-            args.dry_run,
-        );
+        let dto =
+            ScrapeSuumoRawRoomParamsDto::new(params.area.to_string(), params.save, params.dry_run);
 
-        let _res = self.controller.scrape_room_headers_from_suumo(dto).await;
+        let _res = self.controller.scrape_raw_rooms_from_suumo(dto).await;
 
         // 結果表示
         // todo!("DTOを表示する形に修正する")

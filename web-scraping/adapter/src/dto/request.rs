@@ -7,9 +7,16 @@ pub struct RequestDto {
 }
 
 #[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct SuumoRequestDto {
+pub struct ScrapeSuumoRoomHeaderParamsDto {
     pub area: String,
     pub station: String,
+    pub save: bool,
+    pub dry_run: bool,
+}
+
+#[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+pub struct ScrapeSuumoRawRoomParamsDto {
+    pub area: String,
     pub save: bool,
     pub dry_run: bool,
 }
