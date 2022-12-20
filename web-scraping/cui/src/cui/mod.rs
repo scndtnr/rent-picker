@@ -1,6 +1,6 @@
 mod options;
 
-use self::options::{DataAction, Options, ReadDb, Service, Table, Task, WebScrape};
+use self::options::{DataAction, Db, Options, Service, Table, Task, Web};
 use adapter::{
     dto::{ReadDbRequestDto, SuumoRequestDto},
     Controller,
@@ -32,13 +32,13 @@ impl Cui {
             Task::HealthCheck(args) => match args.target {
                 Service::Suumo => self.process_health_check_suumo().await,
             },
-            Task::WebScrape(args) => match args.service {
+            Task::Web(args) => match args.service {
                 Service::Suumo => match args.table {
                     Table::RawRoom => self.process_scrape_suumo_raw_rooms(args).await,
                     Table::RoomHeader => self.process_scrape_suumo_room_headers(args).await,
                 },
             },
-            Task::ReadDb(args) => match args.action {
+            Task::Db(args) => match args.action {
                 DataAction::Summary => self.process_read_db_for_summary(args).await,
                 DataAction::Top => todo!(),
                 DataAction::Export => todo!(),
@@ -56,7 +56,7 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_scrape_suumo_raw_rooms(&self, args: &WebScrape) {
+    async fn process_scrape_suumo_raw_rooms(&self, args: &Web) {
         tracing::debug!("web_scrape args : {:#?}", args);
         let dto = SuumoRequestDto::new(
             args.area.to_string(),
@@ -74,7 +74,7 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_scrape_suumo_room_headers(&self, args: &WebScrape) {
+    async fn process_scrape_suumo_room_headers(&self, args: &Web) {
         tracing::debug!("web_scrape args : {:#?}", args);
         let dto = SuumoRequestDto::new(
             args.area.to_string(),
@@ -92,7 +92,7 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_read_db_for_summary(&self, args: &ReadDb) {
+    async fn process_read_db_for_summary(&self, args: &Db) {
         tracing::debug!("read_db args : {:#?}", args);
         let dto = ReadDbRequestDto::new(args.table.to_string(), args.table_type.to_string());
 

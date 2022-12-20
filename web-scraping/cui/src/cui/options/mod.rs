@@ -1,5 +1,7 @@
+mod sub_command;
 mod value_enum;
 
+pub(crate) use sub_command::{Db, HealthCheck, Web};
 pub(crate) use value_enum::{Area, DataAction, Service, Table, TableType};
 
 /// コマンドライン引数のパース用構造体
@@ -20,41 +22,7 @@ pub(super) enum Task {
     /// ターゲットのヘルスチェックをする
     HealthCheck(HealthCheck),
     /// Webスクレイピングをする
-    WebScrape(WebScrape),
+    Web(Web),
     /// データベースからデータを読み出す
-    ReadDb(ReadDb),
-}
-
-#[derive(Debug, Clone, clap::Args, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) struct HealthCheck {
-    #[arg(short, long, value_enum, default_value_t=Service::Suumo, help = "対象サービスを指定する")]
-    pub(super) target: Service,
-}
-
-#[derive(Debug, Clone, clap::Args, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) struct WebScrape {
-    #[arg(short, long, value_enum, default_value_t=Service::Suumo, help = "対象サービスを指定する")]
-    pub(super) service: Service,
-    #[arg(short, long, value_enum, default_value_t=Table::RoomHeader, help = "取得したい情報を指定する")]
-    pub(super) table: Table,
-    #[arg(short, long, value_enum, default_value_t=Area::Tokyo, help = "検索対象エリアを指定する")]
-    pub(super) area: Area,
-    #[arg(help = "最寄り駅を指定する")]
-    pub(super) station: String,
-    #[arg(long, help = "取得データをデータベースに保存するboolフラグ")]
-    pub(super) save: bool,
-    #[arg(long, help = "ヘッダ情報はデータベースから読む出すboolフラグ")]
-    pub(super) headers_from_database: bool,
-    #[arg(long, help = "各ページのスクレイピングはスキップするboolフラグ")]
-    pub(super) dry_run: bool,
-}
-
-#[derive(Debug, Clone, clap::Args, PartialEq, Eq, PartialOrd, Ord)]
-pub(super) struct ReadDb {
-    #[arg(long, value_enum, default_value_t=DataAction::Summary, help = "データに対する処理を指定する")]
-    pub(super) action: DataAction,
-    #[arg(long, value_enum, default_value_t=Table::RoomHeader, help = "selectしたいテーブルを指定する")]
-    pub(super) table: Table,
-    #[arg(long, value_enum, default_value_t=TableType::Main, help = "selectしたいテーブルの種類を指定する")]
-    pub(super) table_type: TableType,
+    Db(Db),
 }
