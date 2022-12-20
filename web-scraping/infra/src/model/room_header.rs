@@ -50,25 +50,25 @@ impl From<RoomHeader> for RoomHeaderRecord {
 
 impl TryFrom<RoomHeaderRecord> for RoomHeader {
     type Error = anyhow::Error;
-    fn try_from(header: RoomHeaderRecord) -> Result<Self, Self::Error> {
+    fn try_from(record: RoomHeaderRecord) -> Result<Self, Self::Error> {
         Ok(Self::new(
-            header.url,
-            header.building_name,
-            header.location,
-            header.walk_to_station,
-            header.age_in_years,
-            header.number_of_floors,
-            header.transfer_in_search_result,
-            header.area_of_search_condition.try_into()?,
-            header.commute_station_of_search_condition,
-            header.floor,
-            header.rental_fee,
-            header.management_fee,
-            header.security_deposit,
-            header.key_money,
-            header.floor_plan,
-            header.private_area,
-            Jst::from_utc_datetime(&header.scraping_date),
+            record.url,
+            record.building_name,
+            record.location,
+            record.walk_to_station,
+            record.age_in_years,
+            record.number_of_floors,
+            record.transfer_in_search_result,
+            record.area_of_search_condition.try_into()?,
+            record.commute_station_of_search_condition,
+            record.floor,
+            record.rental_fee,
+            record.management_fee,
+            record.security_deposit,
+            record.key_money,
+            record.floor_plan,
+            record.private_area,
+            Jst::from_utc_datetime(&record.scraping_date),
         ))
     }
 }
