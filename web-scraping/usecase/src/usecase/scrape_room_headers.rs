@@ -66,9 +66,6 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
         self.room_header_repo.delete_all(TableType::Temp).await?;
 
         // 作業用一時テーブルにスクレイピングデータを入れ込む
-        // self.room_header_repo
-        //     .insert_many_one_by_one(room_headers, TableType::Temp)
-        //     .await?;
         self.room_header_repo
             .insert_many_multi(room_headers, TableType::Temp)
             .await?;
