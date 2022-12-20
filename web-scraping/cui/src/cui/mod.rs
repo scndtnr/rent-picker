@@ -34,7 +34,7 @@ impl Cui {
             },
             Task::WebScrape(args) => match args.service {
                 Service::Suumo => match args.table {
-                    Table::Room => self.process_scrape_suumo_rooms(args).await,
+                    Table::RawRoom => self.process_scrape_suumo_raw_rooms(args).await,
                     Table::RoomHeader => self.process_scrape_suumo_room_headers(args).await,
                 },
             },
@@ -56,7 +56,7 @@ impl Cui {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn process_scrape_suumo_rooms(&self, args: &WebScrape) {
+    async fn process_scrape_suumo_raw_rooms(&self, args: &WebScrape) {
         tracing::debug!("web_scrape args : {:#?}", args);
         let dto = SuumoRequestDto::new(
             args.area.to_string(),
