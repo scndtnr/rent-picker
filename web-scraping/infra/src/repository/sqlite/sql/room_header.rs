@@ -80,19 +80,6 @@ pub fn insert_all_header(table: TableType) -> String {
     )
 }
 
-/// room_header 系テーブルへの insert文
-pub fn insert_all_column(table: TableType) -> String {
-    let insert_header = self::insert_all_header(table);
-    format!(
-        "
-            {}
-            VALUES
-                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ",
-        insert_header
-    )
-}
-
 /// room_header 系テーブルからテーブルへの全件 insert文
 pub fn insert_from_other_table_all(table: TableType, other: TableType) -> String {
     let table = self::table_name(&table);
@@ -125,19 +112,6 @@ pub fn delete_all(table: TableType) -> String {
     format!(
         "
             DELETE FROM {}
-            ",
-        table
-    )
-}
-
-/// room_header 系テーブルからPKに合致したレコードを削除する delete文
-pub fn delete_by_pk(table: TableType) -> String {
-    let table = self::table_name(&table);
-    format!(
-        "
-            DELETE FROM {}
-            WHERE
-                url = ?
             ",
         table
     )

@@ -1,12 +1,8 @@
-use std::sync::Arc;
-
 use crate::{
     model::{RoomHeaderRecord, RoomHeaderSummaryRecord, RoomHeaderSummaryTable},
     progress_bar::{debug_progress, new_progress_bar},
 };
-use futures::{stream, StreamExt, TryStreamExt};
 use sqlx::{QueryBuilder, Sqlite};
-use usecase::env::get_usize_of_env_var;
 
 use super::{repository_impl::SqliteRepositoryImpl, sql};
 use anyhow::Result;
@@ -45,82 +41,6 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             table_name,
             summary.total_count()
         );
-        Ok(())
-    }
-
-    /// 作業用ロードテーブルからPKで集約したデータを取り出す
-    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
-    async fn select_group_by_pk_from_temp_table(&self) -> Result<RoomHeaders> {
-        let pool = self.reader_pool();
-        let sql = sql::room_header::select_group_by_pk(TableType::Temp);
-        let headers_dto = sqlx::query_as::<_, RoomHeaderRecord>(&sql)
-            .fetch_all(&*pool)
-            .await?;
-
-        let headers: RoomHeaders = headers_dto
-            .into_iter()
-            .map(|header| header.try_into())
-            .collect::<Result<Vec<RoomHeader>>>()?
-            .into();
-        Ok(headers)
-    }
-
-    /// データを1件insertする。
-    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), building_name=source.building_name(), table=table.to_string()), err(Debug))]
-    async fn insert(&self, source: &RoomHeader, table: TableType) -> Result<()> {
-        let pool = self.writer_pool();
-        let dto: RoomHeaderRecord = source.clone().into();
-        let sql = sql::room_header::insert_all_column(table);
-        let _ = sqlx::query(&sql)
-            .bind(dto.url)
-            .bind(dto.building_name)
-            .bind(dto.location)
-            .bind(dto.walk_to_station)
-            .bind(dto.age_in_years)
-            .bind(dto.number_of_floors)
-            .bind(dto.transfer_in_search_result)
-            .bind(dto.area_of_search_condition)
-            .bind(dto.commute_station_of_search_condition)
-            .bind(dto.floor)
-            .bind(dto.rental_fee)
-            .bind(dto.management_fee)
-            .bind(dto.security_deposit)
-            .bind(dto.key_money)
-            .bind(dto.floor_plan)
-            .bind(dto.private_area)
-            .bind(dto.scraping_date)
-            .execute(&*pool)
-            .await?;
-        Ok(())
-    }
-
-    /// 複数のデータを1件ずつinsertする。
-    #[tracing::instrument(level = "debug", skip_all, fields(len=source.len(),table=table.to_string()), err(Debug))]
-    async fn insert_many_one_by_one(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
-        // プログレスバーの準備
-        let target_table = sql::room_header::table_name(&table);
-        let pb_records = new_progress_bar(source.len() as u64).await;
-        pb_records.set_message(format!("Insert to {}...", target_table));
-
-        // insert文の実行
-        let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
-        let result: Result<()> = stream::iter(source.clone().into_inner())
-            .map(|header| (header, Arc::clone(&pb_records), table.clone()))
-            .map(|(header, pb_records, table)| async move {
-                self.insert(&header, table).await?;
-                pb_records.inc(1);
-                debug_progress(&pb_records, "Insert record...").await;
-                Ok(())
-            })
-            .buffer_unordered(buffered_n)
-            .try_collect()
-            .await;
-        result?;
-
-        // プログレスバーの後始末
-        pb_records.finish_with_message(format!("Finish Insert to {}", target_table));
-
-        // 返り値
         Ok(())
     }
 
@@ -213,47 +133,6 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         let pool = self.writer_pool();
         let sql = sql::room_header::delete_all(table);
         let _ = sqlx::query(&sql).execute(&*pool).await?;
-        Ok(())
-    }
-
-    #[tracing::instrument(level = "trace", skip_all, fields(url=source.url(), building_name=source.building_name(), table=table.to_string()), err(Debug))]
-    async fn delete_by_pk(&self, source: &RoomHeader, table: TableType) -> Result<()> {
-        let pool = self.writer_pool();
-        let dto: RoomHeaderRecord = source.clone().into();
-        let sql = sql::room_header::delete_by_pk(table);
-        let _ = sqlx::query(&sql).bind(dto.url).execute(&*pool).await?;
-        Ok(())
-    }
-
-    #[tracing::instrument(level = "debug", skip_all, fields(len=source.len(), table=table.to_string()), err(Debug))]
-    async fn delete_many_by_pk(&self, source: &RoomHeaders, table: TableType) -> Result<()> {
-        // プログレスバーの準備
-        let target_table = sql::room_header::table_name(&table);
-        let pb_records = new_progress_bar(source.len() as u64).await;
-        pb_records.set_message(format!("Delete target record from {}...", target_table));
-
-        // delete文の実行
-        let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
-        let result: Result<()> = stream::iter(source.clone().into_inner())
-            .map(|header| (header, Arc::clone(&pb_records), table.clone()))
-            .map(|(header, pb_records, table)| async move {
-                self.delete_by_pk(&header, table).await?;
-                pb_records.inc(1);
-                debug_progress(&pb_records, "Delete target record...").await;
-                Ok(())
-            })
-            .buffer_unordered(buffered_n)
-            .try_collect()
-            .await;
-        result?;
-
-        // プログレスバーの後始末
-        pb_records.finish_with_message(format!(
-            "Finished Deleting target record from {}",
-            target_table
-        ));
-
-        // 返り値
         Ok(())
     }
 
