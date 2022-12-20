@@ -55,7 +55,7 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
             self.save_room_headers_to_main_table().await?;
         }
 
-        tracing::info!("{:#?}", room_headers.len());
+        tracing::info!("Scraping Page Count: {:#?}", room_headers.len());
 
         Ok(room_headers)
     }
