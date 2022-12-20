@@ -5,6 +5,8 @@ use domain::{
 };
 use url::Url;
 
+use crate::env::get_usize_of_env_var;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ScrapeRawRoomsUsecase<R: Repositories> {
     suumo_repo: R::SuumoRepo,
@@ -44,6 +46,14 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
             let dummy_raw_rooms: RawRooms = Vec::new().into();
             return Ok(dummy_raw_rooms);
         }
+
+        // 一度にスクレイピングする最大ページ数を設定する
+        let max_page = get_usize_of_env_var("MAX_PAGE");
+        let urls = if urls.len() <= (max_page) {
+            urls
+        } else {
+            urls[0..max_page].to_vec()
+        };
 
         // 詳細ページのURLから賃貸の詳細情報を取得する
         let raw_rooms = self.suumo_repo.raw_rooms(&crawler, urls).await?;
