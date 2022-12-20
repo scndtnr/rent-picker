@@ -14,11 +14,7 @@ use domain::{
 #[async_trait::async_trait]
 impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[allow(unused_variables)]
-    async fn find_by_area_and_station(
-        &self,
-        area: TargetArea,
-        station: &str,
-    ) -> Result<RoomHeaders> {
+    async fn find_by_area(&self, area: TargetArea) -> Result<RoomHeaders> {
         todo!()
     }
     async fn find_all(&self) -> Result<RoomHeaders> {
