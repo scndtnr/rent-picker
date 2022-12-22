@@ -377,10 +377,10 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                 .remove("条件")
                 .unwrap_or_else(|| "N/A".to_string());
             let property_code = about_room_table
-                .remove("取り扱い店舗<br>物件コード")
+                .remove("取り扱い店舗物件コード")
                 .unwrap_or_else(|| "N/A".to_string());
             let suumo_code = about_room_table
-                .remove("SUUMO<br>物件コード")
+                .remove("SUUMO物件コード")
                 .unwrap_or_else(|| "N/A".to_string());
             let contract_period = about_room_table
                 .remove("契約期間")

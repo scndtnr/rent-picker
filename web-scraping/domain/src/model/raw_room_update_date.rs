@@ -11,7 +11,7 @@ pub struct RawRoomUpdateDate {
 
 impl RawRoomUpdateDate {
     pub fn new(info_update_str: String, next_update_str: String) -> Self {
-        let info_update_date = Jst::datetime_from_date_str(&info_update_str, 0, 0, 0).unwrap();
+        let info_update_date = Jst::datetime_from_date_str(&info_update_str, 9, 0, 0).unwrap();
 
         let re = Regex::new(r"(?P<days>\d+)").unwrap();
         let next_update_str = Self::full_width_number_to_half_size(next_update_str);
