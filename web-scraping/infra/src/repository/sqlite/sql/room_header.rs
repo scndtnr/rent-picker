@@ -1,4 +1,4 @@
-use domain::model::TableType;
+use domain::model::{TableType, TargetArea};
 
 /// テーブル名を決定する
 pub fn table_name(table: &TableType) -> &str {
@@ -7,6 +7,29 @@ pub fn table_name(table: &TableType) -> &str {
         TableType::Load => "load_room_header",
         TableType::Temp => "temp_room_header",
     }
+}
+
+/// raw_roomテーブルに同一のurlが存在せず、
+/// 指定されたエリアと合致するレコードを取得する select文
+pub fn select_unscraped_raw_room_urls_filtered_by_area(
+    table: &TableType,
+    area: &TargetArea,
+) -> String {
+    let header_table = self::table_name(table);
+    let updated_urls_in_raw_room_table = super::raw_room::select_updated_url(table);
+    format!(
+        "
+        SELECT
+            url
+        FROM
+            {} header
+            LEFT OUTER JOIN ({}) raw on header.url = raw.url
+        WHERE
+            area_of_search_condition = '{}'
+            and raw.url is null
+        ",
+        header_table, updated_urls_in_raw_room_table, area
+    )
 }
 
 /// PK毎に作成日時が最大のレコードを集約する select 文
@@ -135,4 +158,35 @@ pub fn delete_where_group_by_pk_from_other_table(table: TableType, other: TableT
                 ",
         table, group_by_pk_from_other
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn 詳細データ未取得のヘッダ情報を呼ぶクエリ() {
+        let table = TableType::Main;
+        let area = TargetArea::Tokyo;
+        let sql = select_unscraped_raw_room_urls_filtered_by_area(&table, &area);
+        println!("{}", sql);
+        let extended_sql = "
+        SELECT
+            url
+        FROM
+            room_header header
+            LEFT OUTER JOIN (
+        SELECT
+            distinct url
+        FROM
+            raw_room
+        WHERE
+            next_update_date > CURRENT_TIMESTAMP
+        ) raw on header.url = raw.url
+        WHERE
+            area_of_search_condition = 'Tokyo'
+            and raw.url is null
+        ";
+        assert_eq!(&sql, extended_sql);
+    }
 }

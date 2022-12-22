@@ -2,10 +2,11 @@ use crate::{
     model::{RoomHeaderRecord, RoomHeaderSummaryRecord, RoomHeaderSummaryTable},
     progress_bar::{debug_progress, new_progress_bar},
 };
+use reqwest::Url;
 use sqlx::{QueryBuilder, Sqlite};
 
 use super::{repository_impl::SqliteRepositoryImpl, sql};
-use anyhow::Result;
+use anyhow::{Context, Result};
 use domain::{
     model::{AsVec, RoomHeader, RoomHeaders, TableType, TargetArea},
     repository::RoomHeaderRepository,
@@ -13,10 +14,23 @@ use domain::{
 
 #[async_trait::async_trait]
 impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
-    #[allow(unused_variables)]
-    async fn find_unscraped_urls_with_area(&self, area: TargetArea) -> Result<RoomHeaders> {
-        todo!()
+    /// まだ賃貸詳細データをスクレイピングしていない、
+    /// あるいは最終更新が古いURLを返す
+    #[tracing::instrument(level = "debug", skip_all, fields(area=area.to_string()), err(Debug))]
+    async fn find_unscraped_raw_room_urls_with_area(&self, area: TargetArea) -> Result<Vec<Url>> {
+        let pool = self.reader_pool();
+        let sql = sql::room_header::select_unscraped_raw_room_urls_filtered_by_area(
+            &TableType::Main,
+            &area,
+        );
+        let urls: Vec<(String,)> = sqlx::query_as(&sql).fetch_all(&*pool).await?;
+
+        // URLに変換して返す
+        urls.into_iter()
+            .map(|(url,)| Url::parse(&url).context("Fail to parse room page url."))
+            .collect()
     }
+
     async fn find_all(&self) -> Result<RoomHeaders> {
         todo!()
     }

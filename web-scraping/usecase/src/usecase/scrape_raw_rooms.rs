@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use domain::{
     model::{AsVec, RawRooms, TableType, TargetArea},
     repository::{RawRoomRepository, Repositories, RoomHeaderRepository, SuumoRepository},
@@ -70,18 +70,10 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
 
     #[tracing::instrument(skip_all, err(Debug))]
     pub async fn urls_from_database_by_area(&self, area: TargetArea) -> Result<Vec<Url>> {
-        // 住居の属する地域を指定して、データベースから賃貸情報ヘッダを取得する
-        let room_headers = self
-            .room_header_repo
-            .find_unscraped_urls_with_area(area)
-            .await?;
-
-        // 賃貸情報ヘッダから詳細ページのURLを取り出す
-        room_headers
-            .into_inner()
-            .into_iter()
-            .map(|header| Url::parse(header.url()).context("Fail to parse room page url."))
-            .collect()
+        // 住居の属する地域を指定して、データベースから詳細ページのURLを取り出す
+        self.room_header_repo
+            .find_unscraped_raw_room_urls_with_area(area)
+            .await
     }
 
     #[tracing::instrument(skip_all, err(Debug))]
