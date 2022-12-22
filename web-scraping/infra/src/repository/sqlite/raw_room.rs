@@ -80,7 +80,8 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
                         .push_bind(raw_room.notes.clone())
                         .push_bind(raw_room.info_update_date)
                         .push_bind(raw_room.next_update_date)
-                        .push_bind(raw_room.scraping_date);
+                        .push_bind(raw_room.scraping_date)
+                        .push_bind(raw_room.is_expired as u8);
                 });
                 query_builder
             })
@@ -113,10 +114,41 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
 
     /// tempテーブルのPK集約レコードをmainテーブルにinsertする
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
-    async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()> {
+    async fn insert_to_main_from_temp_not_expired_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
-        let sql =
-            sql::raw_room::insert_from_other_table_group_by_pk(&TableType::Main, &TableType::Temp);
+        let sql = sql::raw_room::insert_from_other_table_group_by_pk(
+            &TableType::Main,
+            &TableType::Temp,
+            false,
+        );
+        let _ = sqlx::query(&sql).execute(&*pool).await?;
+        Ok(())
+    }
+
+    // temp テーブルにのみ存在する掲載終了フラグ = true のレコードを
+    // main テーブルに insert する。
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
+    async fn insert_to_main_from_temp_only_expired_record(&self) -> Result<()> {
+        let pool = self.writer_pool();
+        let sql = sql::raw_room::insert_from_other_table_by_is_expired(
+            &TableType::Main,
+            &TableType::Temp,
+            true,
+        );
+        let _ = sqlx::query(&sql).execute(&*pool).await?;
+        Ok(())
+    }
+
+    /// tempテーブルの掲載終了フラグ = true を
+    /// mainテーブルの同PKのレコードに適用する。
+    #[tracing::instrument(level = "debug", skip_all, err(Debug))]
+    async fn update_is_expired_of_main_by_temp(&self) -> Result<()> {
+        let pool = self.writer_pool();
+        let sql = sql::raw_room::update_is_expired_column_by_other_table(
+            &TableType::Main,
+            &TableType::Temp,
+            true,
+        );
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -132,11 +164,12 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
 
     /// tempテーブルのPK集約レコードと合致するレコードをmainテーブルから削除する
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
-    async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
+    async fn delete_from_main_by_temp_not_expired_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = sql::raw_room::delete_where_group_by_pk_from_other_table(
             &TableType::Main,
             &TableType::Temp,
+            false,
         );
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())

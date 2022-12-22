@@ -70,6 +70,8 @@ pub struct RawRoom {
     next_update_date: DateTime<FixedOffset>,
     /// スクレイピングした日時
     scraping_date: DateTime<FixedOffset>,
+    /// 掲載終了フラグ
+    is_expired: bool,
 }
 
 impl RawRoom {
@@ -171,5 +173,8 @@ impl RawRoom {
     }
     pub fn scraping_date(&self) -> DateTime<FixedOffset> {
         self.scraping_date
+    }
+    pub fn is_expired(&self) -> bool {
+        self.is_expired
     }
 }

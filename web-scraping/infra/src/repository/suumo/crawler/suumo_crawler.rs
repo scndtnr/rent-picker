@@ -351,6 +351,10 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                     .unwrap_or_else(|| "N/A".to_string()),
             );
 
+            // 掲載終了フラグ
+            // 特に問題なくスクレイピングできた場合は false
+            let is_expired = false;
+
             RawRoom::new(
                 url.to_string(),
                 suumo_code,
@@ -385,6 +389,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                 update_date.info_update_date(),
                 update_date.next_update_date(),
                 Jst::now(),
+                is_expired,
             )
         };
 

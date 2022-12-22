@@ -97,14 +97,30 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
 
     #[tracing::instrument(skip_all, err(Debug))]
     async fn save_raw_rooms_to_main_table(&self) -> Result<()> {
+        // is_expired = false の
         // 集約データとPKが一致するレコードを本テーブルから削除する
         self.raw_room_repo
-            .delete_from_main_by_temp_record_pk()
+            .delete_from_main_by_temp_not_expired_group_by_pk()
             .await?;
 
+        // is_expired = false の
         // 集約データを本テーブルに入れ込む
         self.raw_room_repo
-            .insert_to_main_from_temp_group_by_pk()
+            .insert_to_main_from_temp_not_expired_group_by_pk()
+            .await?;
+
+        // tempテーブル上は is_expired = true で
+        // 本テーブルに存在するレコードについて、
+        // is_expired カラムを更新する
+        self.raw_room_repo
+            .update_is_expired_of_main_by_temp()
+            .await?;
+
+        // tempテーブル上は is_expired = true で
+        // 本テーブルに存在しないレコードを、
+        // 本テーブルに入れ込む
+        self.raw_room_repo
+            .insert_to_main_from_temp_only_expired_record()
             .await
     }
 }

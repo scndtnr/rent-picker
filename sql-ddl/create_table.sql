@@ -155,6 +155,8 @@ CREATE TABLE raw_room (
     next_update_date DATETIME,
     -- スクレイピングした日時
     scraping_date DATETIME,
+    -- 掲載終了フラグ
+    is_expired INTEGER,
     ---------------------------------
     -- PK制約
     PRIMARY KEY (url)
@@ -194,7 +196,8 @@ CREATE TABLE load_raw_room (
     notes VARCHAR,
     info_update_date DATETIME,
     next_update_date DATETIME,
-    scraping_date DATETIME
+    scraping_date DATETIME,
+    is_expired INTEGER
 );
 
 -- DROP TABLE temp_raw_room;
@@ -231,7 +234,8 @@ CREATE TABLE temp_raw_room (
     notes VARCHAR,
     info_update_date DATETIME,
     next_update_date DATETIME,
-    scraping_date DATETIME
+    scraping_date DATETIME,
+    is_expired INTEGER
 );
 
 /* -- litestream に自動生成されるテーブル -- */

@@ -16,7 +16,7 @@ pub fn select_unscraped_raw_room_urls_filtered_by_area(
     area: &TargetArea,
 ) -> String {
     let header_table = self::table_name(table);
-    let updated_urls_in_raw_room_table = super::raw_room::select_updated_url(table);
+    let latest_urls_in_raw_room_table = super::raw_room::select_latest_url(table);
     format!(
         "
         SELECT
@@ -28,7 +28,7 @@ pub fn select_unscraped_raw_room_urls_filtered_by_area(
             area_of_search_condition = '{}'
             and raw.url is null
         ",
-        header_table, updated_urls_in_raw_room_table, area
+        header_table, latest_urls_in_raw_room_table, area
     )
 }
 

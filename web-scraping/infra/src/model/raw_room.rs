@@ -36,6 +36,7 @@ pub struct RawRoomRecord {
     pub info_update_date: NaiveDateTime,
     pub next_update_date: NaiveDateTime,
     pub scraping_date: NaiveDateTime,
+    pub is_expired: usize,
 }
 
 impl From<RawRoom> for RawRoomRecord {
@@ -74,6 +75,7 @@ impl From<RawRoom> for RawRoomRecord {
             info_update_date: room.info_update_date().naive_utc(),
             next_update_date: room.next_update_date().naive_utc(),
             scraping_date: room.scraping_date().naive_utc(),
+            is_expired: room.is_expired() as usize,
         }
     }
 }
@@ -115,6 +117,11 @@ impl TryFrom<RawRoomRecord> for RawRoom {
             Jst::from_utc_datetime(&record.info_update_date),
             Jst::from_utc_datetime(&record.next_update_date),
             Jst::from_utc_datetime(&record.scraping_date),
+            match record.is_expired {
+                1 => true,
+                0 => false,
+                _ => unreachable!("is_expired must be bool ( 0 or 1 )"),
+            },
         ))
     }
 }
