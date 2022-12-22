@@ -31,10 +31,10 @@ pub struct RawRoomRecord {
     pub transaction_type: String,
     pub conditions: String,
     pub property_code: String,
-    pub info_update_date: String,
-    pub next_update_date: String,
     pub contract_period: String,
     pub notes: String,
+    pub info_update_date: NaiveDateTime,
+    pub next_update_date: NaiveDateTime,
     pub scraping_date: NaiveDateTime,
 }
 
@@ -69,10 +69,10 @@ impl From<RawRoom> for RawRoomRecord {
             transaction_type: room.transaction_type().to_string(),
             conditions: room.conditions().to_string(),
             property_code: room.property_code().to_string(),
-            info_update_date: room.info_update_date().to_string(),
-            next_update_date: room.next_update_date().to_string(),
             contract_period: room.contract_period().to_string(),
             notes: room.notes().to_string(),
+            info_update_date: room.info_update_date().naive_utc(),
+            next_update_date: room.next_update_date().naive_utc(),
             scraping_date: room.scraping_date().naive_utc(),
         }
     }
@@ -110,10 +110,10 @@ impl TryFrom<RawRoomRecord> for RawRoom {
             record.transaction_type,
             record.conditions,
             record.property_code,
-            record.info_update_date,
-            record.next_update_date,
             record.contract_period,
             record.notes,
+            Jst::from_utc_datetime(&record.info_update_date),
+            Jst::from_utc_datetime(&record.next_update_date),
             Jst::from_utc_datetime(&record.scraping_date),
         ))
     }

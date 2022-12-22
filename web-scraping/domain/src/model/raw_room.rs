@@ -60,14 +60,14 @@ pub struct RawRoom {
     conditions: String,
     /// 取り扱い店舗物件コード
     property_code: String,
-    /// 情報更新日
-    info_update_date: String,
-    /// 次回更新日
-    next_update_date: String,
     /// 契約期間
     contract_period: String,
     /// 備考
     notes: String,
+    /// 情報更新日
+    info_update_date: DateTime<FixedOffset>,
+    /// 次回更新日
+    next_update_date: DateTime<FixedOffset>,
     /// スクレイピングした日時
     scraping_date: DateTime<FixedOffset>,
 }
@@ -157,17 +157,17 @@ impl RawRoom {
     pub fn property_code(&self) -> &str {
         &self.property_code
     }
-    pub fn info_update_date(&self) -> &str {
-        &self.info_update_date
-    }
-    pub fn next_update_date(&self) -> &str {
-        &self.next_update_date
-    }
     pub fn contract_period(&self) -> &str {
         &self.contract_period
     }
     pub fn notes(&self) -> &str {
         &self.notes
+    }
+    pub fn info_update_date(&self) -> DateTime<FixedOffset> {
+        self.info_update_date
+    }
+    pub fn next_update_date(&self) -> DateTime<FixedOffset> {
+        self.next_update_date
     }
     pub fn scraping_date(&self) -> DateTime<FixedOffset> {
         self.scraping_date
