@@ -10,6 +10,7 @@ pub struct RequestDto {
 pub struct ScrapeSuumoRoomHeaderParamsDto {
     pub area: String,
     pub station: String,
+    pub max_page: usize,
     pub save: bool,
     pub dry_run: bool,
 }
@@ -17,6 +18,7 @@ pub struct ScrapeSuumoRoomHeaderParamsDto {
 #[derive(new, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct ScrapeSuumoRawRoomParamsDto {
     pub area: String,
+    pub max_page: usize,
     pub save: bool,
     pub dry_run: bool,
 }

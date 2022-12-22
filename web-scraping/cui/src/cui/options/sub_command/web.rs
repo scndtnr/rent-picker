@@ -22,6 +22,13 @@ pub(crate) struct RoomHeader {
     pub(crate) station: String,
     #[arg(short, long, value_enum, default_value_t=Area::Tokyo, help = "検索対象エリアを指定する")]
     pub(crate) area: Area,
+    #[arg(
+        short,
+        long,
+        default_value_t = 1,
+        help = "スクレイピングする最大ページ数を指定する"
+    )]
+    pub(crate) max_page: usize,
     #[arg(long, help = "取得データをデータベースに保存するboolフラグ")]
     pub(crate) save: bool,
     #[arg(long, help = "各ページのスクレイピングはスキップするboolフラグ")]
@@ -32,6 +39,13 @@ pub(crate) struct RoomHeader {
 pub(crate) struct RawRoom {
     #[arg(short, long, value_enum, default_value_t=Area::Tokyo, help = "データベースからの取得対象エリアを指定する")]
     pub(crate) area: Area,
+    #[arg(
+        short,
+        long,
+        default_value_t = 1,
+        help = "スクレイピングする最大ページ数を指定する"
+    )]
+    pub(crate) max_page: usize,
     #[arg(long, help = "取得データをデータベースに保存するboolフラグ")]
     pub(crate) save: bool,
     #[arg(long, help = "各ページのスクレイピングはスキップするboolフラグ")]

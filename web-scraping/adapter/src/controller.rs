@@ -26,6 +26,7 @@ impl<U: Usecases> Controller<U> {
             .scrape_raw_rooms_usecase()
             .scrape_raw_rooms_from_suumo(
                 dto.area.try_into().expect("Fail to convert target area."),
+                dto.max_page,
                 dto.save,
                 dto.dry_run,
             )
@@ -42,6 +43,7 @@ impl<U: Usecases> Controller<U> {
             .scrape_room_headers_from_suumo(
                 dto.area.try_into().expect("Fail to convert target area."),
                 &dto.station,
+                dto.max_page,
                 dto.save,
                 dto.dry_run,
             )

@@ -5,8 +5,6 @@ use domain::{
 };
 use url::Url;
 
-use crate::env::get_usize_of_env_var;
-
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ScrapeRawRoomsUsecase<R: Repositories> {
     suumo_repo: R::SuumoRepo,
@@ -31,6 +29,7 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
     pub async fn scrape_raw_rooms_from_suumo(
         &self,
         area: TargetArea,
+        max_page: usize,
         save: bool,
         dry_run: bool,
     ) -> Result<RawRooms> {
@@ -48,7 +47,6 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
         }
 
         // 一度にスクレイピングする最大ページ数を設定する
-        let max_page = get_usize_of_env_var("MAX_PAGE");
         let urls = if urls.len() <= (max_page) {
             urls
         } else {

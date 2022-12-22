@@ -68,6 +68,7 @@ impl Cui {
         let dto = ScrapeSuumoRoomHeaderParamsDto::new(
             params.area.to_string(),
             params.station.clone(),
+            params.max_page,
             params.save,
             params.dry_run,
         );
@@ -82,8 +83,12 @@ impl Cui {
     #[tracing::instrument(skip_all)]
     async fn process_scrape_suumo_raw_rooms(&self, args: &Web, params: &RawRoom) {
         tracing::debug!("web_scrape args : {:#?}", args);
-        let dto =
-            ScrapeSuumoRawRoomParamsDto::new(params.area.to_string(), params.save, params.dry_run);
+        let dto = ScrapeSuumoRawRoomParamsDto::new(
+            params.area.to_string(),
+            params.max_page,
+            params.save,
+            params.dry_run,
+        );
 
         let _res = self.controller.scrape_raw_rooms_from_suumo(dto).await;
 
