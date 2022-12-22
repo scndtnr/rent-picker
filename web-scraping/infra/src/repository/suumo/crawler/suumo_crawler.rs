@@ -233,6 +233,17 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
         // 賃貸詳細ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
 
+        // 賃貸サイト以外にリダイレクトされていないかチェックする
+        match res.url().path_segments().context("cannot be base")?.next() {
+            Some(root) if root == "chintai" => {
+                tracing::debug!("url root path is 'chintai'. Continue.")
+            }
+            _ => {
+                tracing::debug!("url root path is not 'chintai'. Break.");
+                return Ok(RawRoom::expired_new(url.as_str()));
+            }
+        };
+
         // 詳細情報をパースする
         let text = res.text().await?;
         self.sleep_by_secs(1).await;
