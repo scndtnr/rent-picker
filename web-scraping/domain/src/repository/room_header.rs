@@ -28,5 +28,5 @@ pub trait RoomHeaderRepository {
     async fn delete_all(&self, table: TableType) -> Result<()>;
 
     /// tempテーブルのPK集約レコードと合致するレコードをmainテーブルから削除する
-    async fn delete_from_main_by_temp_record_pk(&self) -> Result<()>;
+    async fn delete_from_main_by_temp_group_by_pk(&self) -> Result<()>;
 }

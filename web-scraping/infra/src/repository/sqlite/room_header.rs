@@ -151,7 +151,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
 
     /// tempテーブルのPK集約レコードと合致するレコードをmainテーブルから削除する
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
-    async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
+    async fn delete_from_main_by_temp_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = sql::room_header::delete_where_group_by_pk_from_other_table(
             &TableType::Main,

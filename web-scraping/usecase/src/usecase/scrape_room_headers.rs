@@ -91,7 +91,7 @@ impl<R: Repositories> ScrapeRoomHeadersUsecase<R> {
     async fn save_room_headers_to_main_table(&self) -> Result<()> {
         // 集約データとPKが一致するレコードを本テーブルから削除する
         self.room_header_repo
-            .delete_from_main_by_temp_record_pk()
+            .delete_from_main_by_temp_group_by_pk()
             .await?;
 
         // 集約データを本テーブルに入れ込む
