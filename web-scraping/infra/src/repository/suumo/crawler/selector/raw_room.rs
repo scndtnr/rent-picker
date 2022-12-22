@@ -1,5 +1,10 @@
 /// 賃貸詳細ページのセレクタ
 
+// 掲載終了時のエラーページ
+pub fn sorry_message() -> String {
+    "div[class='errormainitem-img'] > img".to_string()
+}
+
 // タイトル
 
 pub fn building_name() -> String {

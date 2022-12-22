@@ -240,6 +240,19 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
             // Html構造体に変換する
             let html = self.parse_html(&text);
 
+            // Sorryページかどうか判定する
+            match self.find_element(&html, selector::raw_room::sorry_message().as_str()) {
+                Ok(elem) => {
+                    let msg = elem
+                        .value()
+                        .attr("alt")
+                        .expect("Fail to unwrap sorry message");
+                    tracing::debug!("Sorry message found: {}", msg);
+                    return Ok(RawRoom::expired_new(url.as_str()));
+                }
+                Err(_) => tracing::debug!("Sorry message does not found. continue."),
+            };
+
             // 料金概要
             let building_name =
                 self.find_inner_text(&html, selector::raw_room::building_name().as_str(), ",");
@@ -357,37 +370,37 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
             RawRoom::new(
                 url.to_string(),
-                suumo_code,
-                building_name,
-                rental_fee,
-                management_fee,
-                security_deposit,
-                key_money,
-                guarantee_deposit,
-                key_money_amortization,
-                location,
-                walk_to_station,
-                floor_plan,
-                floor_plan_details,
-                private_area,
-                age_in_years,
-                construction_date_yyyymm,
-                floor,
-                number_of_floors,
-                facing_direction,
-                building_type,
-                features,
-                structure,
-                damage_insurance,
-                parking,
-                move_in,
-                transaction_type,
-                conditions,
-                property_code,
-                contract_period,
-                notes,
-                update_date.info_update_date(),
-                update_date.next_update_date(),
+                Some(suumo_code),
+                Some(building_name),
+                Some(rental_fee),
+                Some(management_fee),
+                Some(security_deposit),
+                Some(key_money),
+                Some(guarantee_deposit),
+                Some(key_money_amortization),
+                Some(location),
+                Some(walk_to_station),
+                Some(floor_plan),
+                Some(floor_plan_details),
+                Some(private_area),
+                Some(age_in_years),
+                Some(construction_date_yyyymm),
+                Some(floor),
+                Some(number_of_floors),
+                Some(facing_direction),
+                Some(building_type),
+                Some(features),
+                Some(structure),
+                Some(damage_insurance),
+                Some(parking),
+                Some(move_in),
+                Some(transaction_type),
+                Some(conditions),
+                Some(property_code),
+                Some(contract_period),
+                Some(notes),
+                Some(update_date.info_update_date()),
+                Some(update_date.next_update_date()),
                 Jst::now(),
                 is_expired,
             )
