@@ -79,7 +79,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .chunks(n)
             .map(|headers| {
                 let mut query_builder: QueryBuilder<Sqlite> =
-                    QueryBuilder::new(sql::room_header::insert_all_header(&table));
+                    QueryBuilder::new(sql::room_header::insert_all_columns(&table));
                 query_builder.push_values(headers, |mut b, header| {
                     b.push_bind(header.url.clone())
                         .push_bind(header.building_name.clone())

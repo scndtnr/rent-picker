@@ -9,8 +9,8 @@ pub fn table_name(table: &TableType) -> &str {
     }
 }
 
-/// raw_roomテーブルに同一のurlが存在せず、
-/// 指定されたエリアと合致するレコードを取得する select文
+/// raw_roomテーブルに存在しない、あるいは最終更新が古いURLで、
+/// かつ指定されたエリアと合致するレコードを取得する select文
 pub fn select_unscraped_raw_room_urls_filtered_by_area(
     table: &TableType,
     area: &TargetArea,
@@ -32,7 +32,7 @@ pub fn select_unscraped_raw_room_urls_filtered_by_area(
     )
 }
 
-/// PK毎に作成日時が最大のレコードを集約する select 文
+/// PK毎にスクレイピング日時が最大のレコードを集約する select 文
 pub fn select_group_by_pk(table: &TableType) -> String {
     let table = self::table_name(table);
     format!(
@@ -74,7 +74,7 @@ pub fn select_group_by_pk(table: &TableType) -> String {
 }
 
 /// room_header 系テーブルへの insert文
-pub fn insert_all_header(table: &TableType) -> String {
+pub fn insert_all_columns(table: &TableType) -> String {
     let table = self::table_name(table);
     format!(
         "
@@ -103,7 +103,7 @@ pub fn insert_all_header(table: &TableType) -> String {
     )
 }
 
-/// room_header 系テーブルからテーブルへの全件 insert文
+/// room_header 系のテーブルからテーブルへの全件 insert文
 pub fn insert_from_other_table_all(table: &TableType, other: &TableType) -> String {
     let table = self::table_name(table);
     let other = self::table_name(other);
@@ -116,7 +116,8 @@ pub fn insert_from_other_table_all(table: &TableType, other: &TableType) -> Stri
     )
 }
 
-/// room_header 系テーブルからテーブルへの全件 insert文
+/// room_header 系のテーブルからPKで集約したデータを
+/// 同じく room_header 系のテーブルへ入れ込む insert文
 pub fn insert_from_other_table_group_by_pk(table: &TableType, other: &TableType) -> String {
     let group_by_pk_from_other = self::select_group_by_pk(other);
     let table = self::table_name(table);
@@ -141,7 +142,7 @@ pub fn delete_all(table: &TableType) -> String {
 }
 
 /// room_header 系テーブルからPKに合致したレコードを削除する delete文
-/// PKは他のテーブルから引っ張ってくる
+/// PKは他の room_header 系テーブルから引っ張ってくる
 pub fn delete_where_group_by_pk_from_other_table(table: &TableType, other: &TableType) -> String {
     let table = self::table_name(table);
     let group_by_pk_from_other = self::select_group_by_pk(other);
