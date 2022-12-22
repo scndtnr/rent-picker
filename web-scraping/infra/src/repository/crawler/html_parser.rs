@@ -4,15 +4,15 @@ use anyhow::{bail, Context, Result};
 use scraper::{ElementRef, Html};
 
 pub trait HtmlParser {
-    fn innter_text_of_element(&self, html: &str, css_selector: &str, sep: &str) -> String {
+    fn innter_text_of_element(&self, html: &str, css_selector: &str, sep: &str) -> Result<String> {
         let html = self.parse_html(html);
-        let element = self.find_element(&html, css_selector).unwrap();
-        self.inner_text(&element, sep)
+        let element = self.find_element(&html, css_selector)?;
+        Ok(self.inner_text(&element, sep))
     }
 
-    fn find_inner_text(&self, html: &Html, css_selector: &str, sep: &str) -> String {
-        let element = self.find_element(html, css_selector).unwrap();
-        self.inner_text(&element, sep)
+    fn find_inner_text(&self, html: &Html, css_selector: &str, sep: &str) -> Result<String> {
+        let element = self.find_element(html, css_selector)?;
+        Ok(self.inner_text(&element, sep))
     }
 
     fn find_inner_text_by_element<'a>(
@@ -20,23 +20,21 @@ pub trait HtmlParser {
         element: &'a ElementRef,
         css_selector: &str,
         sep: &str,
-    ) -> String {
+    ) -> Result<String> {
         let element = self
             .find_element_by_element(element, css_selector)
-            .with_context(|| format!("Fail to find element. selector: {}", css_selector))
-            .unwrap();
-        self.inner_text(&element, sep)
+            .with_context(|| format!("Fail to find element. selector: {}", css_selector))?;
+        Ok(self.inner_text(&element, sep))
     }
 
     fn find_table_and_parse<'a>(
         &self,
         html: &'a Html,
         css_selector: &str,
-    ) -> HashMap<String, String> {
+    ) -> Result<HashMap<String, String>> {
         let table_element = self
             .find_element(html, css_selector)
-            .with_context(|| format!("Fail to find element. selector: {}", css_selector))
-            .unwrap();
+            .with_context(|| format!("Fail to find element. selector: {}", css_selector))?;
         self.parse_table(&table_element)
     }
 
@@ -48,9 +46,16 @@ pub trait HtmlParser {
 
     /// 返り値のElementRefはthreads safeではないため、
     /// async内で利用する場合は{}で囲ってスコープを変える必要がある
-    fn find_elements<'a, 'b>(&self, html: &'a Html, css_selector: &'b str) -> Vec<ElementRef<'a>> {
-        let selector = scraper::Selector::parse(css_selector).unwrap();
-        html.select(&selector).collect::<Vec<ElementRef>>()
+    fn find_elements<'a, 'b>(
+        &self,
+        html: &'a Html,
+        css_selector: &'b str,
+    ) -> Result<Vec<ElementRef<'a>>> {
+        let selector = match scraper::Selector::parse(css_selector) {
+            Ok(selector) => selector,
+            Err(e) => bail!("Fail to parse css selector: {:#?}", e),
+        };
+        Ok(html.select(&selector).collect::<Vec<ElementRef>>())
     }
 
     /// 返り値のElementRefはthreads safeではないため、
@@ -60,7 +65,7 @@ pub trait HtmlParser {
         html: &'a Html,
         css_selector: &'b str,
     ) -> Result<ElementRef<'a>> {
-        let elems = self.find_elements(html, css_selector);
+        let elems = self.find_elements(html, css_selector)?;
         if elems.is_empty() {
             bail!("Element is not found. selector: {}", css_selector);
         } else if elems.len() == 1 {
@@ -76,9 +81,12 @@ pub trait HtmlParser {
         &self,
         element: &'a ElementRef,
         css_selector: &'b str,
-    ) -> Vec<ElementRef<'a>> {
-        let selector = scraper::Selector::parse(css_selector).unwrap();
-        element.select(&selector).collect::<Vec<ElementRef>>()
+    ) -> Result<Vec<ElementRef<'a>>> {
+        let selector = match scraper::Selector::parse(css_selector) {
+            Ok(selector) => selector,
+            Err(e) => bail!("Fail to parse css selector: {:#?}", e),
+        };
+        Ok(element.select(&selector).collect::<Vec<ElementRef>>())
     }
 
     /// 返り値のElementRefはthreads safeではないため、
@@ -88,7 +96,7 @@ pub trait HtmlParser {
         element: &'a ElementRef,
         css_selector: &'b str,
     ) -> Result<ElementRef<'a>> {
-        let elems = self.find_elements_by_element(element, css_selector);
+        let elems = self.find_elements_by_element(element, css_selector)?;
         if elems.is_empty() {
             bail!("Element is not found. selector: {}", css_selector);
         } else if elems.len() == 1 {
@@ -107,22 +115,22 @@ pub trait HtmlParser {
             .join(sep)
     }
 
-    fn parse_table(&self, table: &ElementRef) -> HashMap<String, String> {
+    fn parse_table(&self, table: &ElementRef) -> Result<HashMap<String, String>> {
         let header = self
-            .find_elements_by_element(table, "th")
+            .find_elements_by_element(table, "th")?
             .into_iter()
             .map(|header| self.inner_text(&header, ""));
         let data = self
-            .find_elements_by_element(table, "td")
+            .find_elements_by_element(table, "td")?
             .into_iter()
             .map(|data| self.inner_text(&data, "\n"));
 
-        header
+        Ok(header
             .zip(data)
             .fold(HashMap::new(), |mut acc, (header, data)| {
                 acc.insert(header, data);
                 acc
-            })
+            }))
     }
 }
 
@@ -177,7 +185,7 @@ mod tests {
         "#;
         let html = Html::parse_fragment(html);
         let elem = crawler.find_element(&html, "table").unwrap();
-        let parsed_table = crawler.parse_table(&elem);
+        let parsed_table = crawler.parse_table(&elem).unwrap();
 
         // 値チェック
         // dbg!(&parsed_table);
