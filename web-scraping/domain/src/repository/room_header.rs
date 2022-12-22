@@ -6,9 +6,11 @@ use crate::model::{RoomHeaders, TableType, TargetArea};
 #[cfg_attr(feature = "mock", mockall::automock)]
 #[async_trait::async_trait]
 pub trait RoomHeaderRepository {
-    async fn find_unscraped_raw_room_urls_with_area(&self, area: TargetArea) -> Result<Vec<Url>>;
-
     async fn find_all(&self) -> Result<RoomHeaders>;
+
+    /// まだ賃貸詳細データをスクレイピングしていない、
+    /// あるいは最終更新が古いURLを返す
+    async fn find_unscraped_raw_room_urls_with_area(&self, area: TargetArea) -> Result<Vec<Url>>;
 
     /// 指定されたテーブルのサマリを表示する
     async fn display_summary(&self, table: TableType) -> Result<()>;

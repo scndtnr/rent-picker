@@ -14,6 +14,10 @@ use domain::{
 
 #[async_trait::async_trait]
 impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
+    async fn find_all(&self) -> Result<RoomHeaders> {
+        todo!()
+    }
+
     /// まだ賃貸詳細データをスクレイピングしていない、
     /// あるいは最終更新が古いURLを返す
     #[tracing::instrument(level = "debug", skip_all, fields(area=area.to_string()), err(Debug))]
@@ -29,10 +33,6 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         urls.into_iter()
             .map(|(url,)| Url::parse(&url).context("Fail to parse room page url."))
             .collect()
-    }
-
-    async fn find_all(&self) -> Result<RoomHeaders> {
-        todo!()
     }
 
     /// 指定されたテーブルのサマリを表示する
