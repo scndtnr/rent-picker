@@ -170,6 +170,7 @@ mod tests {
         let table = TableType::Main;
         let area = TargetArea::Tokyo;
         let sql = select_unscraped_raw_room_urls_filtered_by_area(&table, &area);
+        // println!("{}", sql);
         let extended_sql = "
         SELECT
             header.url
@@ -182,6 +183,7 @@ mod tests {
             raw_room
         WHERE
             next_update_date > CURRENT_TIMESTAMP
+            OR is_expired == 1
         ) raw on header.url = raw.url
         WHERE
             area_of_search_condition = 'Tokyo'
