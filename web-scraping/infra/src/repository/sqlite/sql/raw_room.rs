@@ -46,7 +46,7 @@ pub fn select_group_by_pk(table: &TableType) -> String {
             ,t.floor_plan_details
             ,t.private_area
             ,t.age_in_years
-            ,t.age_in_months
+            ,t.construction_date_yyyymm
             ,t.floor
             ,t.number_of_floors
             ,t.facing_direction
@@ -104,7 +104,7 @@ pub fn insert_all_columns(table: &TableType) -> String {
                 ,floor_plan_details
                 ,private_area
                 ,age_in_years
-                ,age_in_months
+                ,construction_date_yyyymm
                 ,floor
                 ,number_of_floors
                 ,facing_direction

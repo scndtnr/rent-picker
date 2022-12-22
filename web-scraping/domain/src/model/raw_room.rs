@@ -35,7 +35,7 @@ pub struct RawRoom {
     /// 築年数
     age_in_years: String,
     /// 築年月
-    age_in_months: String,
+    construction_date_yyyymm: String,
     /// 階
     floor: String,
     /// 階建
@@ -118,8 +118,8 @@ impl RawRoom {
     pub fn age_in_years(&self) -> &str {
         &self.age_in_years
     }
-    pub fn age_in_months(&self) -> &str {
-        &self.age_in_months
+    pub fn construction_date_yyyymm(&self) -> &str {
+        &self.construction_date_yyyymm
     }
     pub fn floor(&self) -> &str {
         &self.floor

@@ -120,7 +120,7 @@ CREATE TABLE raw_room (
     -- 築年数
     age_in_years VARCHAR,
     -- 築年月
-    age_in_months VARCHAR,
+    construction_date_yyyymm VARCHAR,
     -- 階
     floor VARCHAR,
     -- 階建
@@ -177,7 +177,7 @@ CREATE TABLE load_raw_room (
     floor_plan_details VARCHAR,
     private_area VARCHAR,
     age_in_years VARCHAR,
-    age_in_months VARCHAR,
+    construction_date_yyyymm VARCHAR,
     floor VARCHAR,
     number_of_floors VARCHAR,
     facing_direction VARCHAR,
@@ -214,7 +214,7 @@ CREATE TABLE temp_raw_room (
     floor_plan_details VARCHAR,
     private_area VARCHAR,
     age_in_years VARCHAR,
-    age_in_months VARCHAR,
+    construction_date_yyyymm VARCHAR,
     floor VARCHAR,
     number_of_floors VARCHAR,
     facing_direction VARCHAR,

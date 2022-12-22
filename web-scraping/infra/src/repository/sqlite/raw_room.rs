@@ -63,7 +63,7 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
                         .push_bind(raw_room.floor_plan_details.clone())
                         .push_bind(raw_room.private_area.clone())
                         .push_bind(raw_room.age_in_years.clone())
-                        .push_bind(raw_room.age_in_months.clone())
+                        .push_bind(raw_room.construction_date_yyyymm.clone())
                         .push_bind(raw_room.floor.clone())
                         .push_bind(raw_room.number_of_floors.clone())
                         .push_bind(raw_room.facing_direction.clone())
