@@ -6,7 +6,7 @@ use regex::Regex;
 pub struct Jst;
 
 impl Jst {
-    fn offset() -> FixedOffset {
+    pub fn offset() -> FixedOffset {
         let hour = 60 * 60;
         let jst_offset = 9 * hour;
         FixedOffset::east_opt(jst_offset).unwrap()
@@ -36,8 +36,27 @@ impl Jst {
         Jst::offset().from_local_datetime(dt).unwrap()
     }
 
-    /// Suumoの情報更新日の場合："%Y/%m/%d"
-    pub fn datetime_from_str(s: &str, fmt: &str) -> Result<DateTime<FixedOffset>> {
+    /// yyyy-mm-dd あるいは yyyy/mm/ddをDateTime<FixedOffset>オブジェクトに変換する
+    pub fn datetime_from_date_str(
+        s: &str,
+        hour: u32,
+        min: u32,
+        sec: u32,
+    ) -> Result<DateTime<FixedOffset>> {
+        let naive_date_time = Self::date_from_str(s)
+            .unwrap()
+            .and_hms_opt(hour, min, sec)
+            .unwrap();
+        match Self::offset()
+            .from_local_datetime(&naive_date_time)
+            .single()
+        {
+            Some(dt) => Ok(dt),
+            None => bail!("Fail to convert from naive date time to JST"),
+        }
+    }
+
+    pub fn datetime_from_dt_str(s: &str, fmt: &str) -> Result<DateTime<FixedOffset>> {
         match Self::offset().datetime_from_str(s, fmt).ok() {
             Some(dt) => Ok(dt),
             None => bail!("Invalid format. It must be '{}'. Input is '{}'", fmt, s),
@@ -80,7 +99,7 @@ mod tests {
     fn datetime_from_str() {
         let s = "2022/04/26 19:55";
         let fmt = "%Y/%m/%d %H:%M";
-        let dt = Jst::datetime_from_str(s, fmt).unwrap();
+        let dt = Jst::datetime_from_dt_str(s, fmt).unwrap();
         assert_eq!(dt.to_string(), "2022-04-26 19:55:00 +09:00");
     }
 
@@ -92,7 +111,7 @@ mod tests {
         // 各オブジェクトの作成
         let date = Jst::date_from_str(s).unwrap();
         let dt_from_date = date.and_hms_opt(0, 0, 0).unwrap();
-        let dt = Jst::datetime_from_str(s, fmt).unwrap();
+        let dt = Jst::datetime_from_dt_str(s, fmt).unwrap();
 
         // DateとしてパースしたものとDatetimeとしてパースしたものの比較
         // Datetimeの方が時分秒の分、大きい値になるはず
@@ -106,7 +125,7 @@ mod tests {
         let fmt_to = "%Y/%m/%d %H時%M分%S秒";
 
         // Datetimeオブジェクト作成
-        let dt = Jst::datetime_from_str(s, fmt_from).unwrap();
+        let dt = Jst::datetime_from_dt_str(s, fmt_from).unwrap();
         assert_eq!(dt.to_string(), "2022-04-26 19:55:00 +09:00");
 
         // 文字列に戻す

@@ -20,7 +20,7 @@ pub fn select_unscraped_raw_room_urls_filtered_by_area(
     format!(
         "
         SELECT
-            url
+            header.url
         FROM
             {} header
             LEFT OUTER JOIN ({}) raw on header.url = raw.url
@@ -170,10 +170,9 @@ mod tests {
         let table = TableType::Main;
         let area = TargetArea::Tokyo;
         let sql = select_unscraped_raw_room_urls_filtered_by_area(&table, &area);
-        println!("{}", sql);
         let extended_sql = "
         SELECT
-            url
+            header.url
         FROM
             room_header header
             LEFT OUTER JOIN (

@@ -1,7 +1,7 @@
 use super::{selector, SearchQueryParams, SortType, Transfers};
 use crate::repository::{crawler::HttpClient, HtmlParser};
 use anyhow::{bail, Context, Result};
-use domain::model::{Jst, RawRoom, RoomHeader, RoomHeaders, TargetArea};
+use domain::model::{Jst, RawRoom, RawRoomUpdateDate, RoomHeader, RoomHeaders, TargetArea};
 use reqwest::Url;
 use usecase::env::get_env_var;
 
@@ -228,9 +228,166 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     }
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
-    #[allow(unused_variables)]
-    #[tracing::instrument(level = "trace", skip_all, err(Debug))]
+    #[tracing::instrument(level = "trace", skip_all, fields(url=url.as_str()) err(Debug))]
     async fn raw_room_in_detail_page(&self, url: &Url) -> Result<RawRoom> {
-        todo!();
+        // 賃貸詳細ページに遷移する
+        let res = self.client().get(url.as_str()).send().await?;
+
+        // 詳細情報をパースする
+        let text = res.text().await?;
+        self.sleep_by_secs(1).await;
+        let raw_room: RawRoom = {
+            // Html構造体に変換する
+            let html = self.parse_html(&text);
+
+            // 料金概要
+            let building_name =
+                self.find_inner_text(&html, selector::raw_room::building_name().as_str(), ",");
+
+            // 料金概要
+            let rental_fee =
+                self.find_inner_text(&html, selector::raw_room::rental_fee().as_str(), "\n");
+            let management_fee =
+                self.find_inner_text(&html, selector::raw_room::management_fee().as_str(), "\n");
+            let security_deposit =
+                self.find_inner_text(&html, selector::raw_room::security_deposit().as_str(), "\n");
+            let key_money =
+                self.find_inner_text(&html, selector::raw_room::key_money().as_str(), "\n");
+            let guarantee_deposit = self.find_inner_text(
+                &html,
+                selector::raw_room::guarantee_deposit().as_str(),
+                "\n",
+            );
+            let key_money_amortization = self.find_inner_text(
+                &html,
+                selector::raw_room::key_money_amortization().as_str(),
+                "\n",
+            );
+
+            // 建物概要
+            let mut about_building_table = self
+                .find_table_and_parse(&html, selector::raw_room::about_building_table().as_str());
+
+            let location = about_building_table
+                .remove("所在地")
+                .unwrap_or_else(|| "N/A".to_string());
+            let walk_to_station = about_building_table
+                .remove("駅徒歩")
+                .unwrap_or_else(|| "N/A".to_string());
+            let floor_plan = about_building_table
+                .remove("間取り")
+                .unwrap_or_else(|| "N/A".to_string());
+            let private_area = about_building_table
+                .remove("専有面積")
+                .unwrap_or_else(|| "N/A".to_string());
+            let age_in_years = about_building_table
+                .remove("築年数")
+                .unwrap_or_else(|| "N/A".to_string());
+            let floor = about_building_table
+                .remove("階")
+                .unwrap_or_else(|| "N/A".to_string());
+            let facing_direction = about_building_table
+                .remove("向き")
+                .unwrap_or_else(|| "N/A".to_string());
+            let building_type = about_building_table
+                .remove("建物種別")
+                .unwrap_or_else(|| "N/A".to_string());
+
+            // 部屋の特徴・設備
+            let features =
+                self.find_inner_text(&html, selector::raw_room::features().as_str(), "\n");
+
+            // 物件概要
+            let mut about_room_table =
+                self.find_table_and_parse(&html, selector::raw_room::about_room_table().as_str());
+
+            let floor_plan_details = about_room_table
+                .remove("間取り詳細")
+                .unwrap_or_else(|| "N/A".to_string());
+            let structure = about_room_table
+                .remove("構造")
+                .unwrap_or_else(|| "N/A".to_string());
+            let number_of_floors = about_room_table
+                .remove("階建")
+                .unwrap_or_else(|| "N/A".to_string());
+            let construction_date_yyyymm = about_room_table
+                .remove("築年月")
+                .unwrap_or_else(|| "N/A".to_string());
+            let damage_insurance = about_room_table
+                .remove("損保")
+                .unwrap_or_else(|| "N/A".to_string());
+            let parking = about_room_table
+                .remove("駐車場")
+                .unwrap_or_else(|| "N/A".to_string());
+            let move_in = about_room_table
+                .remove("入居")
+                .unwrap_or_else(|| "N/A".to_string());
+            let transaction_type = about_room_table
+                .remove("取引態様")
+                .unwrap_or_else(|| "N/A".to_string());
+            let conditions = about_room_table
+                .remove("条件")
+                .unwrap_or_else(|| "N/A".to_string());
+            let property_code = about_room_table
+                .remove("取り扱い店舗<br>物件コード")
+                .unwrap_or_else(|| "N/A".to_string());
+            let suumo_code = about_room_table
+                .remove("SUUMO<br>物件コード")
+                .unwrap_or_else(|| "N/A".to_string());
+            let contract_period = about_room_table
+                .remove("契約期間")
+                .unwrap_or_else(|| "N/A".to_string());
+            let notes = about_room_table
+                .remove("備考")
+                .unwrap_or_else(|| "N/A".to_string());
+
+            // （最終／次回）更新日時は別途変換する
+            let update_date = RawRoomUpdateDate::new(
+                about_room_table
+                    .remove("情報更新日")
+                    .unwrap_or_else(|| "N/A".to_string()),
+                about_room_table
+                    .remove("次回更新日")
+                    .unwrap_or_else(|| "N/A".to_string()),
+            );
+
+            RawRoom::new(
+                url.to_string(),
+                suumo_code,
+                building_name,
+                rental_fee,
+                management_fee,
+                security_deposit,
+                key_money,
+                guarantee_deposit,
+                key_money_amortization,
+                location,
+                walk_to_station,
+                floor_plan,
+                floor_plan_details,
+                private_area,
+                age_in_years,
+                construction_date_yyyymm,
+                floor,
+                number_of_floors,
+                facing_direction,
+                building_type,
+                features,
+                structure,
+                damage_insurance,
+                parking,
+                move_in,
+                transaction_type,
+                conditions,
+                property_code,
+                contract_period,
+                notes,
+                update_date.info_update_date(),
+                update_date.next_update_date(),
+                Jst::now(),
+            )
+        };
+
+        Ok(raw_room)
     }
 }
