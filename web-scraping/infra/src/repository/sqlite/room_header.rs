@@ -79,7 +79,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
             .chunks(n)
             .map(|headers| {
                 let mut query_builder: QueryBuilder<Sqlite> =
-                    QueryBuilder::new(sql::room_header::insert_all_header(table.clone()));
+                    QueryBuilder::new(sql::room_header::insert_all_header(&table));
                 query_builder.push_values(headers, |mut b, header| {
                     b.push_bind(header.url.clone())
                         .push_bind(header.building_name.clone())
@@ -123,7 +123,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn insert_to_load_from_temp_all(&self) -> Result<()> {
         let pool = self.writer_pool();
-        let sql = sql::room_header::insert_from_other_table_all(TableType::Load, TableType::Temp);
+        let sql = sql::room_header::insert_from_other_table_all(&TableType::Load, &TableType::Temp);
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -132,8 +132,10 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "debug", skip_all, err(Debug))]
     async fn insert_to_main_from_temp_group_by_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
-        let sql =
-            sql::room_header::insert_from_other_table_group_by_pk(TableType::Main, TableType::Temp);
+        let sql = sql::room_header::insert_from_other_table_group_by_pk(
+            &TableType::Main,
+            &TableType::Temp,
+        );
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -142,7 +144,7 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     #[tracing::instrument(level = "debug", skip_all, fields(table=table.to_string()), err(Debug))]
     async fn delete_all(&self, table: TableType) -> Result<()> {
         let pool = self.writer_pool();
-        let sql = sql::room_header::delete_all(table);
+        let sql = sql::room_header::delete_all(&table);
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())
     }
@@ -152,8 +154,8 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
     async fn delete_from_main_by_temp_record_pk(&self) -> Result<()> {
         let pool = self.writer_pool();
         let sql = sql::room_header::delete_where_group_by_pk_from_other_table(
-            TableType::Main,
-            TableType::Temp,
+            &TableType::Main,
+            &TableType::Temp,
         );
         let _ = sqlx::query(&sql).execute(&*pool).await?;
         Ok(())

@@ -33,8 +33,8 @@ pub fn select_unscraped_raw_room_urls_filtered_by_area(
 }
 
 /// PK毎に作成日時が最大のレコードを集約する select 文
-pub fn select_group_by_pk(table: TableType) -> String {
-    let table = self::table_name(&table);
+pub fn select_group_by_pk(table: &TableType) -> String {
+    let table = self::table_name(table);
     format!(
         "
         SELECT
@@ -74,8 +74,8 @@ pub fn select_group_by_pk(table: TableType) -> String {
 }
 
 /// room_header 系テーブルへの insert文
-pub fn insert_all_header(table: TableType) -> String {
-    let table = self::table_name(&table);
+pub fn insert_all_header(table: &TableType) -> String {
+    let table = self::table_name(table);
     format!(
         "
         INSERT INTO {}
@@ -104,9 +104,9 @@ pub fn insert_all_header(table: TableType) -> String {
 }
 
 /// room_header 系テーブルからテーブルへの全件 insert文
-pub fn insert_from_other_table_all(table: TableType, other: TableType) -> String {
-    let table = self::table_name(&table);
-    let other = self::table_name(&other);
+pub fn insert_from_other_table_all(table: &TableType, other: &TableType) -> String {
+    let table = self::table_name(table);
+    let other = self::table_name(other);
     format!(
         "
                 INSERT INTO {}
@@ -117,9 +117,9 @@ pub fn insert_from_other_table_all(table: TableType, other: TableType) -> String
 }
 
 /// room_header 系テーブルからテーブルへの全件 insert文
-pub fn insert_from_other_table_group_by_pk(table: TableType, other: TableType) -> String {
+pub fn insert_from_other_table_group_by_pk(table: &TableType, other: &TableType) -> String {
     let group_by_pk_from_other = self::select_group_by_pk(other);
-    let table = self::table_name(&table);
+    let table = self::table_name(table);
     format!(
         "
                 INSERT INTO {}
@@ -130,8 +130,8 @@ pub fn insert_from_other_table_group_by_pk(table: TableType, other: TableType) -
 }
 
 /// room_header 系テーブルのデータを全削除する delete文
-pub fn delete_all(table: TableType) -> String {
-    let table = self::table_name(&table);
+pub fn delete_all(table: &TableType) -> String {
+    let table = self::table_name(table);
     format!(
         "
             DELETE FROM {}
@@ -142,8 +142,8 @@ pub fn delete_all(table: TableType) -> String {
 
 /// room_header 系テーブルからPKに合致したレコードを削除する delete文
 /// PKは他のテーブルから引っ張ってくる
-pub fn delete_where_group_by_pk_from_other_table(table: TableType, other: TableType) -> String {
-    let table = self::table_name(&table);
+pub fn delete_where_group_by_pk_from_other_table(table: &TableType, other: &TableType) -> String {
+    let table = self::table_name(table);
     let group_by_pk_from_other = self::select_group_by_pk(other);
     format!(
         "
