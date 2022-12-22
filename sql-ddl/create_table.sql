@@ -145,14 +145,14 @@ CREATE TABLE raw_room (
     conditions VARCHAR,
     -- 取り扱い店舗物件コード
     property_code VARCHAR,
-    -- 情報更新日
-    info_update_date VARCHAR,
-    -- 次回更新日
-    next_update_date VARCHAR,
     -- 契約期間
     contract_period VARCHAR,
     -- 備考
     notes VARCHAR,
+    -- 情報更新日
+    info_update_date DATETIME,
+    -- 次回更新日
+    next_update_date DATETIME,
     -- スクレイピングした日時
     scraping_date DATETIME,
     ---------------------------------
@@ -190,10 +190,10 @@ CREATE TABLE load_raw_room (
     transaction_type VARCHAR,
     conditions VARCHAR,
     property_code VARCHAR,
-    info_update_date VARCHAR,
-    next_update_date VARCHAR,
     contract_period VARCHAR,
     notes VARCHAR,
+    info_update_date DATETIME,
+    next_update_date DATETIME,
     scraping_date DATETIME
 );
 
@@ -227,10 +227,10 @@ CREATE TABLE temp_raw_room (
     transaction_type VARCHAR,
     conditions VARCHAR,
     property_code VARCHAR,
-    info_update_date VARCHAR,
-    next_update_date VARCHAR,
     contract_period VARCHAR,
     notes VARCHAR,
+    info_update_date DATETIME,
+    next_update_date DATETIME,
     scraping_date DATETIME
 );
 
