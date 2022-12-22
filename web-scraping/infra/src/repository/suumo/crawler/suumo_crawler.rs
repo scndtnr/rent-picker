@@ -403,6 +403,13 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
             // 特に問題なくスクレイピングできた場合は false
             let is_expired = false;
 
+            // 念のため、取得していない項目を表示する。
+            tracing::debug!(
+                "about_building_table remaining: {:#?}",
+                about_building_table
+            );
+            tracing::debug!("about_room_table remaining: {:#?}", about_room_table);
+
             RawRoom::new(
                 url.to_string(),
                 Some(suumo_code),
