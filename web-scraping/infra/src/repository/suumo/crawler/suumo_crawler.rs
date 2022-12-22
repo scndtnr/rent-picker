@@ -230,7 +230,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[allow(unused_variables)]
     #[tracing::instrument(level = "trace", skip_all, err(Debug))]
-    async fn raw_room_in_detail_page(&self, url: Url) -> Result<RawRoom> {
+    async fn raw_room_in_detail_page(&self, url: &Url) -> Result<RawRoom> {
         todo!();
     }
 }

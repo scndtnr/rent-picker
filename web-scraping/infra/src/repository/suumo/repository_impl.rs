@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use domain::{
-    model::{AsVec, RawRooms, RoomHeader, RoomHeaders, TargetArea},
+    model::{AsVec, RawRoom, RawRooms, RoomHeader, RoomHeaders, TargetArea},
     repository::SuumoRepository,
 };
 use futures::{stream, StreamExt, TryStreamExt};
@@ -80,7 +80,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
         let room_headers_vec: Vec<RoomHeaders> = stream::iter(urls)
             .map(|url| (url, area.clone(), station.to_string(), Arc::clone(&pb_urls)))
             .map(|(url, area, station, pb_urls)| async move {
-                // 対象ページのスクレイピングをする
+                // 対象ページをスクレイピングする
                 let room_headers = crawler
                     .room_headers_in_list_page(&url, &area, &station)
                     .await
@@ -107,6 +107,33 @@ impl SuumoRepository for SuumoRepositoryImpl {
 
     /// 各詳細ページのURLから、賃貸の詳細情報を取得する
     async fn raw_rooms(&self, crawler: &Self::Crawler, urls: Vec<Url>) -> Result<RawRooms> {
-        todo!()
+        // 各賃貸一覧ページから住居情報や詳細ページへのURLを取得する
+        let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
+
+        // プログレスバーの準備
+        let pb_urls = new_progress_bar(urls.len() as u64).await;
+        pb_urls.set_message("Web Scraping in room page...".to_string());
+
+        let raw_rooms: Vec<RawRoom> = stream::iter(urls)
+            .map(|url| (url, Arc::clone(&pb_urls)))
+            .map(|(url, pb_urls)| async move {
+                // 対象ページをスクレイピングする
+                let raw_rooms = crawler
+                    .raw_room_in_detail_page(&url)
+                    .await
+                    .context("Fail to parse room details infomation.")?;
+                // プログレスバーをインクリメントする
+                pb_urls.inc(1);
+                debug_progress(&pb_urls, "Web Scraping in room page...").await;
+
+                anyhow::Ok(raw_rooms)
+            })
+            .buffer_unordered(buffered_n)
+            .try_collect()
+            .await?;
+
+        pb_urls.finish_with_message("Finish web scraping in room page.");
+
+        Ok(raw_rooms.into())
     }
 }
