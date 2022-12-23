@@ -13,10 +13,6 @@
 # 
 # sudo journalctl -xe | grep "google_cloud_ops_agent_engine"
 #
-# ----- Issues -----
-# map_values is now broken:
-# [2.22.0 -> 2.23.0 upgrade broke 'map_values' configuration · Issue #994 · GoogleCloudPlatform/ops-agent](https://github.com/GoogleCloudPlatform/ops-agent/issues/994)
-# 
 
 ---
 logging:
@@ -33,18 +29,18 @@ logging:
       fields:
         logName:
           copy_from: jsonPayload.name
-    # set_severity:
-    #   type: modify_fields
-    #   fields:
-    #     severity:
-    #       copy_from: jsonPayload.level
-    #       map_values:
-    #         '10': TRACE
-    #         '20': DEBUG
-    #         '30': INFO
-    #         '40': WARNING
-    #         '50': ERROR
-    #         '60': CRITICAL
+    set_severity:
+      type: modify_fields
+      fields:
+        severity:
+          copy_from: jsonPayload.level
+          map_values:
+            '10': TRACE
+            '20': DEBUG
+            '30': INFO
+            '40': WARNING
+            '50': ERROR
+            '60': CRITICAL
     set_source_location:
       type: modify_fields
       fields:
@@ -67,6 +63,6 @@ logging:
         processors:
           - parse_json
           - parse_log_name
-          # - set_severity
+          - set_severity
           - set_source_location
           - parse_time
