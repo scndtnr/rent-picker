@@ -106,6 +106,8 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     ) -> Result<RoomHeaders> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
+
+        // 1秒スリープする
         self.sleep_by_secs(1).await;
 
         // 住居情報を取得する
@@ -257,6 +259,9 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
         // 賃貸詳細ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
 
+        // 1秒スリープする
+        self.sleep_by_secs(1).await;
+
         // 賃貸サイト以外にリダイレクトされていないかチェックする
         match res.url().path_segments().context("cannot be base")?.next() {
             Some(root) if root == "chintai" => {
@@ -270,7 +275,6 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
         // 詳細情報をパースする
         let text = res.text().await?;
-        self.sleep_by_secs(1).await;
         let raw_room: RawRoom = {
             // Html構造体に変換する
             let html = self.parse_html(&text);
