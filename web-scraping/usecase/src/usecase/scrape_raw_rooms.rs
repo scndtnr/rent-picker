@@ -3,6 +3,7 @@ use domain::{
     model::{AsVec, RawRooms, TableType, TargetArea},
     repository::{RawRoomRepository, Repositories, RoomHeaderRepository, SuumoRepository},
 };
+
 use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -30,6 +31,7 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
         &self,
         area: TargetArea,
         max_page: usize,
+        chunk_size: usize,
         save: bool,
         dry_run: bool,
     ) -> Result<RawRooms> {
@@ -53,19 +55,28 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
             urls[0..max_page].to_vec()
         };
 
-        // 詳細ページのURLから賃貸の詳細情報を取得する
-        let raw_rooms = self.suumo_repo.raw_rooms(&crawler, urls).await?;
+        // chunk_size 毎に urls を分割して実行する
+        // データベース処理が前後すると不整合が発生するので、
+        // 必ず1チャンク毎に処理するため同期処理とする
+        let mut raw_room_vec = Vec::new();
+        for chunk in urls.chunks(chunk_size) {
+            // 詳細ページのURLから賃貸の詳細情報を取得する
+            let mut raw_rooms = self.suumo_repo.raw_rooms(&crawler, chunk.to_vec()).await?;
 
-        // 賃貸詳細をデータベースに保存する
-        if save {
-            self.save_raw_rooms_to_temp_table(&raw_rooms).await?;
-            self.save_raw_rooms_to_load_table().await?;
-            self.save_raw_rooms_to_main_table().await?;
+            // 賃貸詳細をデータベースに保存する
+            if save {
+                self.save_raw_rooms_to_temp_table(&raw_rooms).await?;
+                self.save_raw_rooms_to_load_table().await?;
+                self.save_raw_rooms_to_main_table().await?;
+            }
+
+            // 結果を格納する
+            raw_room_vec.append(raw_rooms.as_mut_vec())
         }
 
-        tracing::info!("Scraping Page Count: {:#?}", raw_rooms.len());
+        tracing::info!("Scraping Page Count: {:#?}", raw_room_vec.len());
 
-        Ok(raw_rooms)
+        Ok(raw_room_vec.into())
     }
 
     #[tracing::instrument(skip_all, err(Debug))]

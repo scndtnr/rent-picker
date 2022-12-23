@@ -46,6 +46,13 @@ pub(crate) struct RawRoom {
         help = "スクレイピングする最大ページ数を指定する"
     )]
     pub(crate) max_page: usize,
+    #[arg(
+        short,
+        long,
+        default_value_t = 1,
+        help = "スクレイピングとDB保存を行う1セットあたりのページ数を指定する"
+    )]
+    pub(crate) chunk_size: usize,
     #[arg(long, help = "取得データをデータベースに保存するboolフラグ")]
     pub(crate) save: bool,
     #[arg(long, help = "各ページのスクレイピングはスキップするboolフラグ")]

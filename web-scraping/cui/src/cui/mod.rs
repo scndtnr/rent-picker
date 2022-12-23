@@ -86,6 +86,7 @@ impl Cui {
         let dto = ScrapeSuumoRawRoomParamsDto::new(
             params.area.to_string(),
             params.max_page,
+            params.chunk_size,
             params.save,
             params.dry_run,
         );
