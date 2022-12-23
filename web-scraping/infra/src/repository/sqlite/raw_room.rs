@@ -49,6 +49,7 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
                     QueryBuilder::new(sql::raw_room::insert_all_columns(&table));
                 query_builder.push_values(raw_rooms, |mut b, raw_room| {
                     b.push_bind(raw_room.url.clone())
+                        .push_bind(raw_room.redirect_url.clone())
                         .push_bind(raw_room.suumo_code.clone())
                         .push_bind(raw_room.building_name.clone())
                         .push_bind(raw_room.rental_fee.clone())

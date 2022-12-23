@@ -4,6 +4,7 @@ use sqlx::{types::chrono::NaiveDateTime, FromRow};
 #[derive(FromRow, Debug)]
 pub struct RawRoomRecord {
     pub url: String,
+    pub redirect_url: String,
     pub suumo_code: Option<String>,
     pub building_name: Option<String>,
     pub rental_fee: Option<String>,
@@ -43,6 +44,7 @@ impl From<RawRoom> for RawRoomRecord {
     fn from(room: RawRoom) -> Self {
         Self {
             url: room.url().to_string(),
+            redirect_url: room.redirect_url().to_string(),
             suumo_code: room.suumo_code().clone(),
             building_name: room.building_name().clone(),
             rental_fee: room.rental_fee().clone(),
@@ -85,6 +87,7 @@ impl TryFrom<RawRoomRecord> for RawRoom {
     fn try_from(record: RawRoomRecord) -> Result<Self, Self::Error> {
         Ok(Self::new(
             record.url,
+            record.redirect_url,
             record.suumo_code,
             record.building_name,
             record.rental_fee,

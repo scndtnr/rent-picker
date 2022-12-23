@@ -35,6 +35,7 @@ pub fn select_group_by_pk(table: &TableType, is_expired: bool) -> String {
         "
         SELECT
             t.url
+            ,t.redirect_url
             ,t.suumo_code
             ,t.building_name
             ,t.rental_fee
@@ -96,6 +97,7 @@ pub fn insert_all_columns(table: &TableType) -> String {
         INSERT INTO {}
             (
                 url
+                ,redirect_url
                 ,suumo_code
                 ,building_name
                 ,rental_fee

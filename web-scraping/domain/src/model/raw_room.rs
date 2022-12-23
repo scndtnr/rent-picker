@@ -8,6 +8,8 @@ use super::Jst;
 pub struct RawRoom {
     /// 詳細ページのURL
     url: String,
+    /// リダイレクトされたURL
+    redirect_url: String,
     /// suumo物件コード
     suumo_code: Option<String>,
     /// 建物名
@@ -78,9 +80,10 @@ pub struct RawRoom {
 
 impl RawRoom {
     // new
-    pub fn expired_new(url: &str) -> Self {
+    pub fn expired_new(url: &str, redirect_url: &str) -> Self {
         Self::new(
             url.to_string(),
+            redirect_url.to_string(),
             None,
             None,
             None,
@@ -119,6 +122,9 @@ impl RawRoom {
 
     pub fn url(&self) -> &str {
         &self.url
+    }
+    pub fn redirect_url(&self) -> &str {
+        &self.redirect_url
     }
     pub fn suumo_code(&self) -> &Option<String> {
         &self.suumo_code

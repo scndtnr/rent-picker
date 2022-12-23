@@ -263,13 +263,18 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
         self.sleep_by_secs(1).await;
 
         // 賃貸サイト以外にリダイレクトされていないかチェックする
-        match res.url().path_segments().context("cannot be base")?.next() {
+        let redirect_url = res.url().clone();
+        match redirect_url
+            .path_segments()
+            .context("cannot be base")?
+            .next()
+        {
             Some(root) if root == "chintai" => {
                 tracing::debug!("url root path is 'chintai'. Continue.")
             }
             _ => {
                 tracing::debug!("url root path is not 'chintai'. Break.");
-                return Ok(RawRoom::expired_new(url.as_str()));
+                return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
             }
         };
 
@@ -287,7 +292,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                         .attr("alt")
                         .expect("Fail to unwrap sorry message");
                     tracing::debug!("Sorry message found: {}", msg);
-                    return Ok(RawRoom::expired_new(url.as_str()));
+                    return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
                 }
                 Err(_) => tracing::debug!("Sorry message does not found. continue."),
             };
@@ -416,6 +421,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
             RawRoom::new(
                 url.to_string(),
+                redirect_url.to_string(),
                 Some(suumo_code),
                 Some(building_name),
                 Some(rental_fee),
