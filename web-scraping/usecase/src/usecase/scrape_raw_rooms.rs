@@ -6,6 +6,8 @@ use domain::{
 
 use url::Url;
 
+use crate::progress_bar::{debug_progress, new_progress_bar};
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ScrapeRawRoomsUsecase<R: Repositories> {
     suumo_repo: R::SuumoRepo,
@@ -55,11 +57,21 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
             urls[0..max_page].to_vec()
         };
 
+        // プログレスバーの準備
+        let chunks_len = (urls.len() as f64 / chunk_size as f64).ceil() as u64;
+        let pb_message = "[RawRoom - Processing] Web-Scraping and Insert to database by chunk...";
+        let pb_chunks = new_progress_bar(chunks_len).await;
+        pb_chunks.set_message(pb_message);
+
         // chunk_size 毎に urls を分割して実行する
         // データベース処理が前後すると不整合が発生するので、
         // 必ず1チャンク毎に処理するため同期処理とする
         let mut raw_room_vec = Vec::new();
         for chunk in urls.chunks(chunk_size) {
+            // プログレスバーをインクリメントしてログを出す
+            pb_chunks.inc(1);
+            debug_progress(&pb_chunks, pb_message).await;
+
             // 詳細ページのURLから賃貸の詳細情報を取得する
             let mut raw_rooms = self.suumo_repo.raw_rooms(&crawler, chunk.to_vec()).await?;
 
@@ -71,8 +83,14 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
             }
 
             // 結果を格納する
-            raw_room_vec.append(raw_rooms.as_mut_vec())
+            raw_room_vec.append(raw_rooms.as_mut_vec());
         }
+
+        // プログレスバーの後始末
+        let pb_finish_message =
+            "[RawRoom - Finished] Web-Scraping and Insert to database by chunk.";
+        pb_chunks.finish_with_message(pb_finish_message);
+        debug_progress(&pb_chunks, pb_finish_message).await;
 
         tracing::info!("Scraping Page Count: {:#?}", raw_room_vec.len());
 
