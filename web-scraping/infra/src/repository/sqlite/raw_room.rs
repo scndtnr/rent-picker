@@ -27,8 +27,9 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
     async fn insert_many_multi(&self, source: &RawRooms, table: TableType) -> Result<()> {
         // プログレスバーの準備
         let target_table = sql::raw_room::table_name(&table);
+        let pb_message = format!("[RawRoom - Processing] Insert to {}...", target_table);
         let pb_records = new_progress_bar(source.len() as u64).await;
-        pb_records.set_message(format!("Insert to {}...", target_table));
+        pb_records.set_message(pb_message.clone());
 
         // RawRoomsをDTOのVecに変換する
         let dto_raw_rooms: Vec<RawRoomRecord> = source
@@ -89,14 +90,19 @@ impl RawRoomRepository for SqliteRepositoryImpl<RawRoom> {
         // n 件毎に insert を実行する
         let pool = self.writer_pool();
         for mut builder in query_builders {
+            // プログレスバーをインクリメントしてログを出す
+            pb_records.inc(n as u64);
+            debug_progress(&pb_records, &pb_message).await;
+
+            // 実処理
             let query = builder.build();
             query.execute(&*pool).await?;
-            pb_records.inc(n as u64);
-            debug_progress(&pb_records, "Insert record...").await;
         }
 
         // プログレスバーの後始末
-        pb_records.finish_with_message(format!("Finish Insert to {}", target_table));
+        let pb_finish_message = format!("[RawRoom - Finished]  Insert to {}", target_table);
+        pb_records.finish_with_message(pb_finish_message.clone());
+        debug_progress(&pb_records, &pb_finish_message).await;
 
         // 返り値
         Ok(())

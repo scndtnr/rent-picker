@@ -72,8 +72,9 @@ impl SuumoRepository for SuumoRepositoryImpl {
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
 
         // プログレスバーの準備
+        let pb_message = "[RoomHeader - Processing] Web Scraping...";
         let pb_urls = new_progress_bar(urls.len() as u64).await;
-        pb_urls.set_message("Web Scraping in list page...".to_string());
+        pb_urls.set_message(pb_message);
 
         let room_headers_vec: Vec<RoomHeaders> = stream::iter(urls)
             .map(|url| (url, area.clone(), station.to_string(), Arc::clone(&pb_urls)))
@@ -83,9 +84,11 @@ impl SuumoRepository for SuumoRepositoryImpl {
                     .room_headers_in_list_page(&url, &area, &station)
                     .await
                     .context("Fail to parse room headers infomation.")?;
-                // プログレスバーをインクリメントする
+
+                // プログレスバーをインクリメントしてログを出す
+                // 非同期処理のため、終わったタイミングでインクリメントする。
                 pb_urls.inc(1);
-                debug_progress(&pb_urls, "Web Scraping in list page...").await;
+                debug_progress(&pb_urls, pb_message).await;
 
                 anyhow::Ok(room_headers)
             })
@@ -98,7 +101,10 @@ impl SuumoRepository for SuumoRepositoryImpl {
             .collect::<Vec<RoomHeader>>()
             .into();
 
-        pb_urls.finish_with_message("Finish web scraping in list page.");
+        // プログレスバーの後始末
+        let pb_finish_message = "[RoomHeader - Finished] Web Scraping.";
+        pb_urls.finish_with_message(pb_finish_message);
+        debug_progress(&pb_urls, pb_finish_message).await;
 
         Ok(room_headers)
     }
@@ -109,8 +115,9 @@ impl SuumoRepository for SuumoRepositoryImpl {
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
 
         // プログレスバーの準備
+        let pb_message = "[RawRoom - Processing] Web Scraping...";
         let pb_urls = new_progress_bar(urls.len() as u64).await;
-        pb_urls.set_message("Web Scraping in room page...".to_string());
+        pb_urls.set_message(pb_message);
 
         let raw_rooms: Vec<RawRoom> = stream::iter(urls)
             .map(|url| (url, Arc::clone(&pb_urls)))
@@ -120,9 +127,11 @@ impl SuumoRepository for SuumoRepositoryImpl {
                     .raw_room_in_detail_page(&url)
                     .await
                     .context("Fail to parse room details infomation.")?;
-                // プログレスバーをインクリメントする
+
+                // プログレスバーをインクリメントしてログを出す
+                // 非同期処理のため、終わったタイミングでインクリメントする。
                 pb_urls.inc(1);
-                debug_progress(&pb_urls, "Web Scraping in room page...").await;
+                debug_progress(&pb_urls, pb_message).await;
 
                 anyhow::Ok(raw_rooms)
             })
@@ -130,7 +139,10 @@ impl SuumoRepository for SuumoRepositoryImpl {
             .try_collect()
             .await?;
 
-        pb_urls.finish_with_message("Finish web scraping in room page.");
+        // プログレスバーの後始末
+        let pb_finish_message = "[RawRoom - Finished] Web Scraping.";
+        pb_urls.finish_with_message(pb_finish_message);
+        debug_progress(&pb_urls, pb_finish_message).await;
 
         Ok(raw_rooms.into())
     }

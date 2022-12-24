@@ -4,7 +4,7 @@ use indicatif::{FormattedDuration, HumanDuration, ProgressBar, ProgressState, Pr
 
 async fn progress_bar_style() -> ProgressStyle {
     ProgressStyle::with_template(
-        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>9}/{len:9}  ({eta}) {msg}",
+        "{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7}  ({eta}) {msg}",
     )
     .unwrap()
     .with_key("eta", |state: &ProgressState, w: &mut dyn Write| {
@@ -28,7 +28,7 @@ pub async fn debug_progress(pb: &ProgressBar, msg: &str) {
         length
     };
     tracing::debug!(
-        "[{}] {:>9}/{:<9}  ({:#}) {}",
+        "[{}] {:>7}/{:<7}  ({:#}) {}",
         FormattedDuration(pb.elapsed()),
         position,
         length,
