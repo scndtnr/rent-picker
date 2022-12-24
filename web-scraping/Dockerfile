@@ -12,15 +12,15 @@ RUN apt-get update \
 
 COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --recipe-path recipe.json
+RUN cargo chef cook --release  --recipe-path recipe.json
 # Build application
 COPY . .
-RUN cargo build --bin cui
+RUN cargo build --release --bin cui
 
 # We do not need the Rust toolchain to run the binary!
 # debian:slim version
 FROM debian:bullseye-slim AS runtime
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=builder /app/target/debug/cui /usr/local/bin
+COPY --from=builder /app/target/release/cui /usr/local/bin
 # ENTRYPOINT ["/usr/local/bin/cui"]
 ENTRYPOINT ["/bin/bash"]

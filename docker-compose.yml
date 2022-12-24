@@ -27,7 +27,7 @@ services:
     image: rent-picker-web-scraping:release-bullseye-slim
     build:
       context: web-scraping
-      dockerfile: Dockerfile_release
+      dockerfile: Dockerfile
     tty: true
     env_file:
       - web-scraping/dotenv/.env.docker
