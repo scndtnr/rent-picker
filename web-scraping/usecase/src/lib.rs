@@ -1,4 +1,5 @@
 pub mod env;
+pub mod progress_bar;
 mod usecase;
 
 pub use self::usecase::{

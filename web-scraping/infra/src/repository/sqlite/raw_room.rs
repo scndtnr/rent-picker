@@ -1,14 +1,12 @@
-use crate::{
-    model::RawRoomRecord,
-    progress_bar::{debug_progress, new_progress_bar},
-};
-
 use super::{sql, SqliteRepositoryImpl};
-use anyhow::Result;
+use crate::model::RawRoomRecord;
 use domain::{
     model::{AsVec, RawRoom, RawRooms, TableType},
     repository::RawRoomRepository,
 };
+use usecase::progress_bar::{debug_progress, new_progress_bar};
+
+use anyhow::Result;
 use sqlx::{QueryBuilder, Sqlite};
 
 #[async_trait::async_trait]

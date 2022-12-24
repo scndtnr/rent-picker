@@ -1,20 +1,18 @@
-use std::sync::Arc;
-
-use anyhow::{Context, Result};
+use super::SuumoCrawler;
+use crate::repository::ReqwestCrawler;
 use domain::{
     model::{AsVec, RawRoom, RawRooms, RoomHeader, RoomHeaders, TargetArea},
     repository::SuumoRepository,
 };
+use usecase::{
+    env::get_usize_of_env_var,
+    progress_bar::{debug_progress, new_progress_bar},
+};
+
+use anyhow::{Context, Result};
 use futures::{stream, StreamExt, TryStreamExt};
 use reqwest::Url;
-
-use crate::{
-    progress_bar::{debug_progress, new_progress_bar},
-    repository::ReqwestCrawler,
-};
-use usecase::env::get_usize_of_env_var;
-
-use super::SuumoCrawler;
+use std::sync::Arc;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SuumoRepositoryImpl;

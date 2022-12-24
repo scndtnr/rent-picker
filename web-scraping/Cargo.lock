@@ -970,7 +970,6 @@ dependencies = [
  "domain",
  "dotenv",
  "futures",
- "indicatif",
  "regex",
  "reqwest",
  "scraper",
@@ -2544,6 +2543,7 @@ dependencies = [
  "async-trait",
  "domain",
  "futures",
+ "indicatif",
  "tracing",
  "url",
 ]

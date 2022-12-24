@@ -13,14 +13,14 @@ async fn progress_bar_style() -> ProgressStyle {
     .progress_chars("#>-")
 }
 
-pub(crate) async fn new_progress_bar(total: u64) -> Arc<ProgressBar> {
+pub async fn new_progress_bar(total: u64) -> Arc<ProgressBar> {
     let style = progress_bar_style().await;
     let pb = ProgressBar::new(total);
     pb.set_style(style);
     Arc::new(pb)
 }
 
-pub(crate) async fn debug_progress(pb: &ProgressBar, msg: &str) {
+pub async fn debug_progress(pb: &ProgressBar, msg: &str) {
     let length = pb.length().unwrap_or(0);
     let position = if pb.position() < length {
         pb.position()

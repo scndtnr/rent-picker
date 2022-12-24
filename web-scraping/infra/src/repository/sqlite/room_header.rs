@@ -1,16 +1,14 @@
-use crate::{
-    model::{RoomHeaderRecord, RoomHeaderSummaryRecord, RoomHeaderSummaryTable},
-    progress_bar::{debug_progress, new_progress_bar},
-};
-use reqwest::Url;
-use sqlx::{QueryBuilder, Sqlite};
-
 use super::{repository_impl::SqliteRepositoryImpl, sql};
-use anyhow::{Context, Result};
+use crate::model::{RoomHeaderRecord, RoomHeaderSummaryRecord, RoomHeaderSummaryTable};
 use domain::{
     model::{AsVec, RoomHeader, RoomHeaders, TableType, TargetArea},
     repository::RoomHeaderRepository,
 };
+use usecase::progress_bar::{debug_progress, new_progress_bar};
+
+use anyhow::{Context, Result};
+use reqwest::Url;
+use sqlx::{QueryBuilder, Sqlite};
 
 #[async_trait::async_trait]
 impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
