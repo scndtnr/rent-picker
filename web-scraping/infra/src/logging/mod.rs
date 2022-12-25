@@ -9,6 +9,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 enum LogType {
     App,
     Db,
+    #[allow(unused)]
     System,
 }
 
@@ -29,7 +30,7 @@ pub fn init_logging(name: &str) {
         // .with(filtered_layer::bunyan_stdio_filtered_by_level(name))
         .with(filtered_layer::bunyan_file_of_app(name))
         .with(filtered_layer::bunyan_file_of_db(name))
-        .with(filtered_layer::bunyan_file_not_filtered(name))
+        // .with(filtered_layer::bunyan_file_not_filtered(name))
         .init();
 }
 

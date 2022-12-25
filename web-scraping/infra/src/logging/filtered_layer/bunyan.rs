@@ -85,6 +85,7 @@ where
 }
 
 /// (system log) bunyan形式でファイルに書き込むフォーマッタ
+#[allow(unused)]
 pub(crate) fn bunyan_file_not_filtered<S>(name: &str) -> BunyanRollingFileLayerFilterdByLevel<S>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
