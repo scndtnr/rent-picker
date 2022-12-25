@@ -2,6 +2,19 @@ version: '3.4'
 
 services:
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - type: bind
+        source: ./open-telemetry/otel-collector-config.yaml
+        target: /etc/otel-collector-config.yaml
+      - type: volume
+        source: certs
+        target: /usr/share/otel/config/certs
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+
   sqlite-restore:
     image: litestream/litestream
     tty: true
@@ -33,6 +46,7 @@ services:
       - web-scraping/dotenv/.env.docker
     depends_on:
       - 'sqlite-restore'
+      - 'otel-collector'
     volumes:
       - type: bind
         source: ./data
@@ -59,3 +73,7 @@ services:
     command: [-c, "
       /usr/local/bin/litestream replicate -config /opt/litestream/litestream.yaml
       "]
+
+volumes:
+  certs:
+    driver: local
