@@ -1,5 +1,5 @@
 pub mod env;
-pub mod log;
+pub mod logging;
 pub mod model;
 pub mod persistence;
 mod repository;
