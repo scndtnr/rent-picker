@@ -3,6 +3,7 @@ use opentelemetry_otlp::WithExportConfig;
 use tracing::Subscriber;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
 use tracing_subscriber::registry::LookupSpan;
+use usecase::env::get_env_var;
 
 /// OpenTelemetry の Trace 情報を送信するレイヤー
 pub(crate) fn otel_trace_layer<S>() -> OpenTelemetryLayer<S, Tracer>
@@ -21,6 +22,7 @@ pub(crate) fn otel_metrics_layer() -> MetricsLayer {
 
 // https://github.com/open-telemetry/opentelemetry-rust/blob/d4b9befea04bcc7fc19319a6ebf5b5070131c486/examples/basic-otlp/src/main.rs#L35-L52
 fn build_metrics_controller() -> BasicController {
+    let endpoint = get_env_var("OTEL_COLLECTOR_ENDPOINT").unwrap();
     opentelemetry_otlp::new_pipeline()
         .metrics(
             opentelemetry::sdk::metrics::selectors::simple::histogram(Vec::new()),
@@ -30,19 +32,20 @@ fn build_metrics_controller() -> BasicController {
         .with_exporter(
             opentelemetry_otlp::new_exporter()
                 .tonic()
-                .with_endpoint("http://localhost:4317"),
+                .with_endpoint(endpoint),
         )
         .build()
         .expect("Failed to build metrics controller")
 }
 
 fn build_tracer() -> Tracer {
+    let endpoint = get_env_var("OTEL_COLLECTOR_ENDPOINT").unwrap();
     opentelemetry_otlp::new_pipeline()
         .tracing()
         .with_exporter(
             opentelemetry_otlp::new_exporter()
                 .tonic()
-                .with_endpoint("http://localhost:4317"),
+                .with_endpoint(endpoint),
         )
         .with_trace_config(
             opentelemetry::sdk::trace::config()
