@@ -1,27 +1,7 @@
 // dotenvの読み込みが必要かどうか確認する
 fn is_required_set_dotenv() -> bool {
-    match std::env::var("IS_LOCAL").ok() {
-        Some(s) if s.to_uppercase() == "TRUE" => {
-            println!(
-                "Env 'IS_LOCAL' is '{}'. Continue  set_dotenv.",
-                s.to_uppercase()
-            );
-            true
-        }
-        Some(_s) => {
-            // // comment out for cli tool of bunyan.
-            // // not to make this first std output
-            // println!(
-            //     "Env 'IS_LOCAL' is '{}'. Break set_dotenv.",
-            //     s.to_uppercase()
-            // );
-            false
-        }
-        None => {
-            println!("Env 'IS_LOCAL' is not found. Continue set_dotenv.");
-            true
-        }
-    }
+    // 環境変数 IS_DOCKER が存在しないなら set_dotenvが必要
+    std::env::var("IS_DOCKER").ok().is_none()
 }
 
 /// dotenvファイルを読み込む
