@@ -7,7 +7,7 @@ services:
     command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
       - type: bind
-        source: ./open-telemetry/otel-collector-config.yaml
+        source: ./.open-telemetry/otel-collector-config.yaml
         target: /etc/otel-collector-config.yaml
       - type: volume
         source: certs
@@ -19,13 +19,13 @@ services:
     image: litestream/litestream
     tty: true
     env_file:
-      - ./litestream/.env
+      - ./.litestream/.env
     volumes:
       - type: bind
         source: ./data
         target: /data
       - type: bind
-        source: ./litestream
+        source: ./.litestream
         target: /opt/litestream
     entrypoint: /bin/sh
     command: [-c, "
@@ -56,7 +56,7 @@ services:
     image: litestream/litestream
     tty: true
     env_file:
-      - ./litestream/.env
+      - ./.litestream/.env
     depends_on:
       - 'web-scraping'
     volumes:
@@ -64,7 +64,7 @@ services:
         source: ./data
         target: /data
       - type: bind
-        source: ./litestream
+        source: ./.litestream
         target: /opt/litestream
     entrypoint: /bin/sh
     command: [-c, "
