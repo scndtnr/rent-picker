@@ -1,6 +1,8 @@
 .history
 sqlite3def.exe
 rent-picker.sqlite3
+.open-telemetry/.env
+.open-telemetry/*.json
 .litestream/.env
 .litestream/*.json
 .litestream/litestream.yaml
