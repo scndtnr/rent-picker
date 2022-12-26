@@ -5,6 +5,11 @@ pub fn sorry_message() -> String {
     "div[class='errormainitem-img'] > img".to_string()
 }
 
+// libraryページの
+pub fn library_page() -> String {
+    "div[class='fl'] > a[href='/library/']".to_string()
+}
+
 // タイトル
 
 pub fn building_name() -> String {

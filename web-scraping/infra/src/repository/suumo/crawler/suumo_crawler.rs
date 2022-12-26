@@ -262,21 +262,8 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
         // 1秒スリープする
         self.sleep_by_secs(1).await;
 
-        // 賃貸サイト以外にリダイレクトされていないかチェックする
+        // リダイレクトURLを束縛しておく
         let redirect_url = res.url().clone();
-        match redirect_url
-            .path_segments()
-            .context("cannot be base")?
-            .next()
-        {
-            Some(root) if root == "chintai" => {
-                tracing::debug!("url root path is 'chintai'. Continue.")
-            }
-            _ => {
-                tracing::debug!("url root path is not 'chintai'. Break.");
-                return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
-            }
-        };
 
         // 詳細情報をパースする
         let text = res.text().await?;
@@ -291,11 +278,20 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
                         .value()
                         .attr("alt")
                         .expect("Fail to unwrap sorry message");
-                    tracing::debug!("Sorry message found: {}", msg);
+                    tracing::trace!("Sorry message found: {}", msg);
                     return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
                 }
-                Err(_) => tracing::debug!("Sorry message does not found. continue."),
+                Err(_) => tracing::trace!("Sorry message does not found. continue."),
             };
+
+            // libraryページかどうか判定する
+            match self.find_inner_text(&html, selector::raw_room::library_page().as_str(), "") {
+                Ok(title) => {
+                    tracing::trace!("Library page found: {}", title);
+                    return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
+                }
+                Err(_) => tracing::trace!("Library page does not found. continue."),
+            }
 
             // 料金概要
             let building_name =
@@ -413,11 +409,11 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
             let is_expired = false;
 
             // 念のため、取得していない項目を表示する。
-            tracing::debug!(
+            tracing::trace!(
                 "about_building_table remaining: {:#?}",
                 about_building_table
             );
-            tracing::debug!("about_room_table remaining: {:#?}", about_room_table);
+            tracing::trace!("about_room_table remaining: {:#?}", about_room_table);
 
             RawRoom::new(
                 url.to_string(),
