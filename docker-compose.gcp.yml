@@ -7,7 +7,7 @@ services:
     command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
       - type: bind
-        source: ./.open-telemetry/otel-collector-config.yaml
+        source: ./.open-telemetry/otel-collector-config.gcp.yaml
         target: /etc/otel-collector-config.yaml
       - type: volume
         source: certs

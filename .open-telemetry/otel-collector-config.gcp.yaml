@@ -19,13 +19,36 @@ exporters:
     verbosity: detailed
     sampling_initial: 5
 
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/googlecloudexporter
+  googlecloud:
+    # Google Cloud Monitoring returns an error if any of the points are invalid, but still accepts the valid points.
+    # Retrying successfully sent points is guaranteed to fail because the points were already written.
+    # This results in a loop of unnecessary retries.  For now, disable retry_on_failure.
+    retry_on_failure:
+      enabled: false
+    log:
+      default_log_name: opentelemetry.io/collector-exported-log
+
+
+processors:
+  # https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
+  batch:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
+  resourcedetection:
+    detectors: [gcp]
+    timeout: 10s
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+      processors: [memory_limiter, batch]
+      exporters: [logging, googlecloud]
     metrics:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+      processors: [memory_limiter, batch]
+      exporters: [logging, googlecloud]
