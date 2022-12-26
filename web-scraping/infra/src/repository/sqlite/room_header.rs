@@ -105,13 +105,13 @@ impl RoomHeaderRepository for SqliteRepositoryImpl<RoomHeader> {
         // n 件毎に insertを実行する
         let pool = self.writer_pool();
         for mut builder in query_builders {
-            // プログレスバーをインクリメントしてログを出す
-            pb_records.inc(n as u64);
-            debug_progress(&pb_records, &pb_message).await;
-
             // 実処理
             let query = builder.build();
             query.execute(&*pool).await?;
+
+            // プログレスバーをインクリメントしてログを出す
+            pb_records.inc(n as u64);
+            debug_progress(&pb_records, &pb_message).await;
         }
 
         // プログレスバーの後始末

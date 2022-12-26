@@ -68,10 +68,6 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
         // 必ず1チャンク毎に処理するため同期処理とする
         let mut raw_room_vec = Vec::new();
         for chunk in urls.chunks(chunk_size) {
-            // プログレスバーをインクリメントしてログを出す
-            pb_chunks.inc(1);
-            debug_progress(&pb_chunks, pb_message).await;
-
             // 詳細ページのURLから賃貸の詳細情報を取得する
             let mut raw_rooms = self.suumo_repo.raw_rooms(&crawler, chunk.to_vec()).await?;
 
@@ -84,6 +80,10 @@ impl<R: Repositories> ScrapeRawRoomsUsecase<R> {
 
             // 結果を格納する
             raw_room_vec.append(raw_rooms.as_mut_vec());
+
+            // プログレスバーをインクリメントしてログを出す
+            pb_chunks.inc(1);
+            debug_progress(&pb_chunks, pb_message).await;
         }
 
         // プログレスバーの後始末
