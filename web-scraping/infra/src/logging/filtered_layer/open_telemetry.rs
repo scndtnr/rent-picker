@@ -12,13 +12,15 @@ use tracing_subscriber::{
 /// app log
 
 /// (app log) OpenTelemetry の Trace 情報を Collector に送信するレイヤー
-pub(crate) fn otel_trace_layer_of_app<S>() -> Filtered<OpenTelemetryLayer<S, Tracer>, Targets, S>
+pub(crate) fn otel_trace_layer_of_app<S>(
+    service_name: &str,
+) -> Filtered<OpenTelemetryLayer<S, Tracer>, Targets, S>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     let filter = logging::filter::app_only(false);
 
-    logging::layer::open_telemetry::otel_trace_layer().with_filter(filter)
+    logging::layer::open_telemetry::otel_trace_layer(service_name).with_filter(filter)
 }
 
 /// (app log) OpenTelemetry の Metrics 情報を Collector に送信するレイヤー
@@ -36,13 +38,14 @@ where
 /// (system log) OpenTelemetry の Trace 情報を Collector に送信するレイヤー
 #[allow(unused)]
 pub(crate) fn otel_trace_layer_not_filtered<S>(
+    service_name: &str,
 ) -> Filtered<OpenTelemetryLayer<S, Tracer>, LevelFilter, S>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     let filter = logging::filter::system(false);
 
-    logging::layer::open_telemetry::otel_trace_layer().with_filter(filter)
+    logging::layer::open_telemetry::otel_trace_layer(service_name).with_filter(filter)
 }
 
 /// (system log) OpenTelemetry の Metrics 情報を Collector に送信するレイヤー

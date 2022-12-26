@@ -5,6 +5,7 @@ mod writer;
 
 use tracing_bunyan_formatter::JsonStorageLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use usecase::env::get_env_var;
 
 enum LogType {
     App,
@@ -15,22 +16,23 @@ enum LogType {
 
 /// log (tracing) の初期化をする関数
 /// アプリケーションの処理実行前に利用する
-pub fn init_logging(name: &str) {
+pub fn init_logging() {
+    let service_name = get_env_var("SERVICE_NAME").unwrap();
     // ログ設定にフィルタ・フォーマットを登録し適用する
     tracing_subscriber::registry()
         // --- OpenTelemetry layer ---
-        .with(filtered_layer::otel_trace_layer_of_app())
+        .with(filtered_layer::otel_trace_layer_of_app(&service_name))
         .with(filtered_layer::otel_metrics_layer_of_app())
         // .with(filtered_layer::otel_trace_layer_not_filtered())
         // .with(filtered_layer::otel_metrics_layer_not_filtered())
         // --- bunyan formatting layer ---
         .with(JsonStorageLayer)
-        .with(filtered_layer::bunyan_stdio_of_app(name))
-        // .with(filtered_layer::bunyan_stdio_of_db(name))
-        // .with(filtered_layer::bunyan_stdio_filtered_by_level(name))
-        .with(filtered_layer::bunyan_file_of_app(name))
-        .with(filtered_layer::bunyan_file_of_db(name))
-        // .with(filtered_layer::bunyan_file_not_filtered(name))
+        .with(filtered_layer::bunyan_stdio_of_app(&service_name))
+        // .with(filtered_layer::bunyan_stdio_of_db(&service_name))
+        // .with(filtered_layer::bunyan_stdio_filtered_by_level(&service_name))
+        .with(filtered_layer::bunyan_file_of_app(&service_name))
+        .with(filtered_layer::bunyan_file_of_db(&service_name))
+        // .with(filtered_layer::bunyan_file_not_filtered(&service_name))
         .init();
 }
 

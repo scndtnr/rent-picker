@@ -6,11 +6,11 @@ use tracing_subscriber::registry::LookupSpan;
 use usecase::env::get_env_var;
 
 /// OpenTelemetry の Trace 情報を送信するレイヤー
-pub(crate) fn otel_trace_layer<S>() -> OpenTelemetryLayer<S, Tracer>
+pub(crate) fn otel_trace_layer<S>(service_name: &str) -> OpenTelemetryLayer<S, Tracer>
 where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
-    let tracer = build_tracer();
+    let tracer = build_tracer(service_name);
     tracing_opentelemetry::layer().with_tracer(tracer)
 }
 
@@ -38,7 +38,7 @@ fn build_metrics_controller() -> BasicController {
         .expect("Failed to build metrics controller")
 }
 
-fn build_tracer() -> Tracer {
+fn build_tracer(service_name: &str) -> Tracer {
     let endpoint = get_env_var("OTEL_COLLECTOR_ENDPOINT").unwrap();
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -52,7 +52,7 @@ fn build_tracer() -> Tracer {
                 .with_sampler(opentelemetry::sdk::trace::Sampler::AlwaysOn)
                 .with_id_generator(opentelemetry::sdk::trace::RandomIdGenerator::default())
                 .with_resource(opentelemetry::sdk::Resource::new(vec![
-                    opentelemetry::KeyValue::new("service.name", "sample-app"),
+                    opentelemetry::KeyValue::new("service.name", service_name.to_string()),
                 ])),
         )
         .install_batch(opentelemetry::runtime::Tokio)
