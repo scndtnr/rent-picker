@@ -14,9 +14,6 @@ services:
       - type: bind
         source: ./.open-telemetry/gcp-key-for-otel-collector.json
         target: /opt/open-telemetry/gcp-key-for-otel-collector.json
-      - type: volume
-        source: certs
-        target: /usr/share/otel/config/certs
     ports:
       - "4317:4317"   # OTLP gRPC receiver
 
@@ -75,7 +72,3 @@ services:
     command: [-c, "
       /usr/local/bin/litestream replicate -config /opt/litestream/litestream.yaml
       "]
-
-volumes:
-  certs:
-    driver: local
