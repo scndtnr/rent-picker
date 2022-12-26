@@ -7,7 +7,16 @@ receivers:
         endpoint: "0.0.0.0:4317"
 
 processors:
+  # https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
   batch:
+  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
+  resourcedetection:
+    detectors: [gcp]
+    timeout: 10s
 
 # https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/README.md
 exporters:
@@ -29,18 +38,6 @@ exporters:
     log:
       default_log_name: opentelemetry.io/collector-exported-log
 
-
-processors:
-  # https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md
-  memory_limiter:
-    check_interval: 1s
-    limit_percentage: 65
-    spike_limit_percentage: 20
-  batch:
-  # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
-  resourcedetection:
-    detectors: [gcp]
-    timeout: 10s
 
 service:
   pipelines:
