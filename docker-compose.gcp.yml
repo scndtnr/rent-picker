@@ -4,13 +4,16 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
-    command: [ "--config=/opt/open-telemetry/otel-collector-config.yaml" ]
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
     env_file:
       - ./.open-telemetry/.env
     volumes:
       - type: bind
-        source: ./.open-telemetry
-        target: /opt/open-telemetry
+        source: ./.open-telemetry/otel-collector-config.yaml
+        target: /etc/otel-collector-config.yaml
+      - type: bind
+        source: ./.open-telemetry/gcp-key-for-otel-collector.json
+        target: /opt/open-telemetry/gcp-key-for-otel-collector.json
       - type: volume
         source: certs
         target: /usr/share/otel/config/certs
