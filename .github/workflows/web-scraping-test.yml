@@ -29,6 +29,10 @@ jobs:
       TZ: 'Asia/Tokyo'
     steps:
       - uses: actions/checkout@v3
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          version: "3.12.4-1"
       - name: Install Rust and llvm-tools-preview
         uses: actions-rs/toolchain@v1
         with:
