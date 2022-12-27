@@ -20,37 +20,20 @@ logging:
     rent-picker-log:
       type: files
       include_paths:
-        - /home/zumi/rent-picker/log/web-scraping/*/app.log*
+        - /home/zumi/rent-picker/log/web-scraping/*/stackdriver_app.log*
   processors:
     parse_json:
       type: parse_json
       time_key: time
       time_format: "%Y-%m-%dT%H:%M:%S.%LZ"
-    parse_log_name:
-      type: modify_fields
-      fields:
-        logName:
-          copy_from: jsonPayload.name
     set_severity:
       type: modify_fields
       fields:
-        jsonPayload.severity:
-          move_from: jsonPayload.level
-          map_values:
-            '10': 'TRACE'
-            '20': 'DEBUG'
-            '30': 'INFO'
-            '40': 'WARNING'
-            '50': 'ERROR'
-            '60': 'CRITICAL'
+        severity:
+          move_from: jsonPayload.severity
     set_source_location:
       type: modify_fields
       fields:
-        sourceLocation.file:
-          move_from: jsonPayload.file
-        sourceLocation.line:
-          move_from: jsonPayload.line
-          type: integer
         sourceLocation.function:
           move_from: jsonPayload.target
   service:
@@ -60,6 +43,5 @@ logging:
           - rent-picker-log
         processors:
           - parse_json
-          - parse_log_name
           - set_severity
           - set_source_location
