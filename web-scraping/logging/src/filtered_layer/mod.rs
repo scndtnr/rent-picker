@@ -13,8 +13,8 @@ pub(super) use stackdriver::{stackdriver_file_of_app, stackdriver_file_of_db};
 #[cfg(all(feature = "stackdriver", not(feature = "bunyan")))]
 pub(super) use stackdriver::stackdriver_stdio_of_app;
 
-#[cfg(feature = "otel")]
+#[cfg(all(feature = "otel", not(feature = "stackdriver")))]
 mod open_telemetry;
 
-#[cfg(feature = "otel")]
+#[cfg(all(feature = "otel", not(feature = "stackdriver")))]
 pub(super) use open_telemetry::{otel_metrics_layer_of_app, otel_trace_layer_of_app};

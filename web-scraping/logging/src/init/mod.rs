@@ -8,7 +8,7 @@ use crate::env::get_env_var;
 use tracing_bunyan_formatter::JsonStorageLayer;
 
 /// bunyan と OpenTelemetry を併用する場合の初期化処理
-#[cfg(all(feature = "bunyan", feature = "otel"))]
+#[cfg(all(feature = "bunyan", feature = "otel", not(feature = "stackdriver")))]
 pub(crate) fn init_logging_with_bunyan_and_otel() {
     let service_name = get_env_var("SERVICE_NAME").unwrap();
     // ログ設定にフィルタ・フォーマットを登録し適用する
