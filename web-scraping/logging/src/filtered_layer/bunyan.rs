@@ -42,7 +42,8 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     let file_filter = filter::app_only(false);
-    let make_writer = writer::rolling_file(LogType::App);
+    let filename = crate::writer::log_filename(LogType::App);
+    let make_writer = writer::rolling_file(filename);
 
     layer::bunyan::bunyan_file_format(name, make_writer).with_filter(file_filter)
 }
@@ -66,7 +67,8 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     let file_filter = filter::db_only(false);
-    let make_writer = writer::rolling_file(LogType::Db);
+    let filename = crate::writer::log_filename(LogType::Db);
+    let make_writer = writer::rolling_file(filename);
 
     layer::bunyan::bunyan_file_format(name, make_writer).with_filter(file_filter)
 }
@@ -91,7 +93,8 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     let file_filter = filter::system(false);
-    let make_writer = writer::rolling_file(LogType::System);
+    let filename = crate::writer::log_filename(LogType::System);
+    let make_writer = writer::rolling_file(filename);
 
     layer::bunyan::bunyan_file_format(name, make_writer).with_filter(file_filter)
 }

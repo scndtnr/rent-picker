@@ -17,7 +17,7 @@ enum LogType {
 pub fn init_logging() {
     cfg_if::cfg_if! {
         if #[cfg(all(feature = "bunyan", feature = "stackdriver"))] {
-            compile_error!("Error: Feature \"bunyan\" and feature \"stackdriver\" cannot be enabled at the same time.");
+            init::init_logging_with_bunyan_and_stackdriver();
         } else if #[cfg(all(feature = "bunyan", feature = "otel"))] {
             init::init_logging_with_bunyan_and_otel();
         } else if #[cfg(feature = "bunyan")] {

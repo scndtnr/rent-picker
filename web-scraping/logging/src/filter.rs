@@ -38,6 +38,7 @@ pub(super) fn db_only(env_level_filter: bool) -> Targets {
 }
 
 /// 出力対象クレートに依存クレートも含める（全てのログを出力する）
+#[allow(unused)]
 pub(super) fn system(env_level_filter: bool) -> LevelFilter {
     LevelFilter::from_level(level(env_level_filter))
 }

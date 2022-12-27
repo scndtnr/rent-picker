@@ -10,13 +10,20 @@ use tracing_appender::rolling::RollingFileAppender;
 // std::io::stdout を使えば良い
 
 /// ファイル出力用のWriter
-pub(super) fn rolling_file(log_type: LogType) -> RollingFileAppender {
+pub(super) fn rolling_file(filename: String) -> RollingFileAppender {
     // ログディレクトリパスとファイル名を生成する
     let dirpath = log_dirpath();
-    let filename = log_filename(log_type);
 
     // ログファイルのWriterを生成する
     tracing_appender::rolling::hourly(dirpath, filename)
+}
+
+pub(super) fn log_filename(log_type: LogType) -> String {
+    match log_type {
+        LogType::App => get_env_var("LOG_FILENAME_APP").unwrap(),
+        LogType::Db => get_env_var("LOG_FILENAME_DB").unwrap(),
+        LogType::System => get_env_var("LOG_FILENAME_SYSTEM").unwrap(),
+    }
 }
 
 fn log_dirpath() -> PathBuf {
@@ -32,12 +39,4 @@ fn log_dirpath() -> PathBuf {
 
     // ディレクトリパスを作成する
     current_dir.join(log_dir).join(today)
-}
-
-fn log_filename(log_type: LogType) -> String {
-    match log_type {
-        LogType::App => get_env_var("LOG_FILENAME_APP").unwrap(),
-        LogType::Db => get_env_var("LOG_FILENAME_DB").unwrap(),
-        LogType::System => get_env_var("LOG_FILENAME_SYSTEM").unwrap(),
-    }
 }
