@@ -6,6 +6,7 @@ description.workspace = true
 
 
 [dependencies]
+logging.workspace = true
 infra.workspace = true
 domain.workspace = true
 usecase.workspace = true

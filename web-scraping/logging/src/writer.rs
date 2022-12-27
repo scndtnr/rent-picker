@@ -1,6 +1,7 @@
+use crate::env::get_env_var;
+
 use super::LogType;
-use domain::model::Jst;
-use usecase::env::get_env_var;
+use chrono::Utc;
 
 use std::path::PathBuf;
 use tracing_appender::rolling::RollingFileAppender;
@@ -27,7 +28,7 @@ fn log_dirpath() -> PathBuf {
 
     // 環境変数からログディレクトリへのPATH要素を取得する
     let log_dir = get_env_var("LOG_DIR").unwrap();
-    let today = Jst::today().format("%Y-%m-%d").to_string();
+    let today = Utc::now().format("%Y-%m-%d").to_string();
 
     // ディレクトリパスを作成する
     current_dir.join(log_dir).join(today)

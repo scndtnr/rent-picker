@@ -3,7 +3,8 @@ use opentelemetry_otlp::WithExportConfig;
 use tracing::Subscriber;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
 use tracing_subscriber::registry::LookupSpan;
-use usecase::env::get_env_var;
+
+use crate::env::get_env_var;
 
 /// OpenTelemetry の Trace 情報を送信するレイヤー
 pub(crate) fn otel_trace_layer<S>(service_name: &str) -> OpenTelemetryLayer<S, Tracer>

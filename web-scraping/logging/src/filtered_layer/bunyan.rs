@@ -7,7 +7,7 @@ use tracing_subscriber::{
     Layer,
 };
 
-use crate::logging::{filter, layer, writer, LogType};
+use crate::{filter, layer, writer, LogType};
 
 // type: filtered by targets
 
