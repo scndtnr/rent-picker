@@ -272,26 +272,32 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
             let html = self.parse_html(&text);
 
             // Sorryページかどうか判定する
-            match self.find_element(&html, selector::raw_room::sorry_message().as_str()) {
-                Ok(elem) => {
-                    let msg = elem
-                        .value()
-                        .attr("alt")
-                        .expect("Fail to unwrap sorry message");
-                    tracing::trace!("Sorry message found: {}", msg);
-                    return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
-                }
-                Err(_) => tracing::trace!("Sorry message does not found. continue."),
+            if let Ok(elem) = self.find_element(&html, selector::raw_room::sorry_message().as_str())
+            {
+                let msg = elem
+                    .value()
+                    .attr("alt")
+                    .expect("Fail to unwrap sorry message");
+                tracing::trace!("Sorry message found: {}", msg);
+                return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
             };
 
             // libraryページかどうか判定する
-            match self.find_inner_text(&html, selector::raw_room::library_page().as_str(), "") {
-                Ok(title) => {
-                    tracing::trace!("Library page found: {}", title);
-                    return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
-                }
-                Err(_) => tracing::trace!("Library page does not found. continue."),
-            }
+            if let Ok(title) =
+                self.find_inner_text(&html, selector::raw_room::library_page().as_str(), "")
+            {
+                tracing::trace!("Library page found: {}", title);
+                return Ok(RawRoom::expired_new(url.as_str(), redirect_url.as_str()));
+            };
+
+            // その他スクレイピングできない状況か判定する
+            if let Err(e) = self.find_element(&html, selector::raw_room::building_name().as_str()) {
+                tracing::warn!("Buiding name is not found. Return empty struct: {}", e);
+                return Ok(RawRoom::not_expired_new(
+                    url.as_str(),
+                    redirect_url.as_str(),
+                ));
+            };
 
             // 料金概要
             let building_name =

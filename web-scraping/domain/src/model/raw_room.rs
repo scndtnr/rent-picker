@@ -81,6 +81,14 @@ pub struct RawRoom {
 impl RawRoom {
     // new
     pub fn expired_new(url: &str, redirect_url: &str) -> Self {
+        Self::empty_new(url, redirect_url, true)
+    }
+
+    pub fn not_expired_new(url: &str, redirect_url: &str) -> Self {
+        Self::empty_new(url, redirect_url, false)
+    }
+
+    pub fn empty_new(url: &str, redirect_url: &str, is_expired: bool) -> Self {
         Self::new(
             url.to_string(),
             redirect_url.to_string(),
@@ -116,7 +124,7 @@ impl RawRoom {
             None,
             None,
             Jst::now(),
-            true,
+            is_expired,
         )
     }
 
