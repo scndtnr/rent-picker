@@ -257,7 +257,17 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
     #[tracing::instrument(level = "trace", skip_all, fields(url=url.as_str()) err(Debug))]
     async fn raw_room_in_detail_page(&self, url: &Url) -> Result<RawRoom> {
         // 賃貸詳細ページに遷移する
-        let res = self.client().get(url.as_str()).send().await?;
+        let res = match self.client().get(url.as_str()).send().await {
+            Ok(res) => res,
+            // prepare for "Connection reset by peer (os error 104)"
+            Err(e) => {
+                tracing::error!(
+                    "Fail to request detail page. Return empty struct. Error: {}",
+                    e
+                );
+                return Ok(RawRoom::not_expired_new(url.as_str(), ""));
+            }
+        };
 
         // 1秒スリープする
         self.sleep_by_secs(1).await;
@@ -266,7 +276,20 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
         let redirect_url = res.url().clone();
 
         // 詳細情報をパースする
-        let text = res.text().await?;
+        let text = match res.text().await {
+            Ok(text) => text,
+            // prepare for "Connection reset by peer (os error 104)"
+            Err(e) => {
+                tracing::error!(
+                    "Fail to get request body. Return emplty struct. Error: {}",
+                    e
+                );
+                return Ok(RawRoom::not_expired_new(
+                    url.as_str(),
+                    redirect_url.as_str(),
+                ));
+            }
+        };
         let raw_room: RawRoom = {
             // Html構造体に変換する
             let html = self.parse_html(&text);
@@ -292,7 +315,10 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
             // その他スクレイピングできない状況か判定する
             if let Err(e) = self.find_element(&html, selector::raw_room::building_name().as_str()) {
-                tracing::warn!("Buiding name is not found. Return empty struct: {}", e);
+                tracing::warn!(
+                    "Buiding name is not found. Return empty struct. Error: {}",
+                    e
+                );
                 return Ok(RawRoom::not_expired_new(
                     url.as_str(),
                     redirect_url.as_str(),
