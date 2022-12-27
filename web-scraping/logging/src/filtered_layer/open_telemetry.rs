@@ -1,5 +1,5 @@
 use opentelemetry::sdk::trace::Tracer;
-use tracing::{metadata::LevelFilter, Subscriber};
+use tracing::Subscriber;
 use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
 use tracing_subscriber::{
     filter::{Filtered, Targets},
@@ -27,32 +27,6 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     let filter = crate::filter::app_only(false);
-
-    crate::layer::open_telemetry::otel_metrics_layer().with_filter(filter)
-}
-
-// system log
-
-/// (system log) OpenTelemetry の Trace 情報を Collector に送信するレイヤー
-#[allow(unused)]
-pub(crate) fn otel_trace_layer_not_filtered<S>(
-    service_name: &str,
-) -> Filtered<OpenTelemetryLayer<S, Tracer>, LevelFilter, S>
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-{
-    let filter = crate::filter::system(false);
-
-    crate::layer::open_telemetry::otel_trace_layer(service_name).with_filter(filter)
-}
-
-/// (system log) OpenTelemetry の Metrics 情報を Collector に送信するレイヤー
-#[allow(unused)]
-pub(crate) fn otel_metrics_layer_not_filtered<S>() -> Filtered<MetricsLayer, LevelFilter, S>
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-{
-    let filter = crate::filter::system(false);
 
     crate::layer::open_telemetry::otel_metrics_layer().with_filter(filter)
 }

@@ -22,7 +22,6 @@ pub(super) fn log_filename(log_type: LogType) -> String {
     match log_type {
         LogType::App => get_env_var("LOG_FILENAME_APP").unwrap(),
         LogType::Db => get_env_var("LOG_FILENAME_DB").unwrap(),
-        LogType::System => get_env_var("LOG_FILENAME_SYSTEM").unwrap(),
     }
 }
 

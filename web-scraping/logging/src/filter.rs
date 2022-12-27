@@ -1,5 +1,5 @@
 use tracing::Level;
-use tracing_subscriber::filter::{LevelFilter, Targets};
+use tracing_subscriber::filter::Targets;
 
 use crate::env::get_env_var;
 
@@ -35,10 +35,4 @@ pub(super) fn app_only(env_level_filter: bool) -> Targets {
 /// （※ハイフンはアンダースコアに置き換えないと認識されない）
 pub(super) fn db_only(env_level_filter: bool) -> Targets {
     Targets::new().with_target("sqlx", level(env_level_filter))
-}
-
-/// 出力対象クレートに依存クレートも含める（全てのログを出力する）
-#[allow(unused)]
-pub(super) fn system(env_level_filter: bool) -> LevelFilter {
-    LevelFilter::from_level(level(env_level_filter))
 }

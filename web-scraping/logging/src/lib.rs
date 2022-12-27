@@ -8,8 +8,6 @@ mod writer;
 enum LogType {
     App,
     Db,
-    #[allow(unused)]
-    System,
 }
 
 /// log (tracing) の初期化をする関数

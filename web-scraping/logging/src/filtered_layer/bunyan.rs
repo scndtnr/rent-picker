@@ -1,4 +1,4 @@
-use tracing::{metadata::LevelFilter, Subscriber};
+use tracing::Subscriber;
 use tracing_appender::rolling::RollingFileAppender;
 use tracing_bunyan_formatter::BunyanFormattingLayer;
 use tracing_subscriber::{
@@ -15,14 +15,6 @@ type BunyanStdioLayerFilterdByTargets<S> =
     Filtered<BunyanFormattingLayer<fn() -> std::io::Stdout>, Targets, S>;
 type BunyanRollingFileLayerFilterdByTargets<S> =
     Filtered<BunyanFormattingLayer<RollingFileAppender>, Targets, S>;
-
-// type: filtered by level filter
-
-#[allow(unused)]
-type BunyanStdioLayerFilterdByLevel<S> =
-    Filtered<BunyanFormattingLayer<fn() -> std::io::Stdout>, LevelFilter, S>;
-type BunyanRollingFileLayerFilterdByLevel<S> =
-    Filtered<BunyanFormattingLayer<RollingFileAppender>, LevelFilter, S>;
 
 // app log
 
@@ -50,17 +42,6 @@ where
 
 // db log
 
-/// (db log) bunyan形式で標準出力に書き込むフォーマッタ
-#[allow(unused)]
-pub(crate) fn bunyan_stdio_of_db<S>(name: &str) -> BunyanStdioLayerFilterdByTargets<S>
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-{
-    let stdio_filter = filter::db_only(true);
-
-    layer::bunyan::bunyan_stdio_format(name).with_filter(stdio_filter)
-}
-
 /// (db log) bunyan形式でファイルに書き込むフォーマッタ
 pub(crate) fn bunyan_file_of_db<S>(name: &str) -> BunyanRollingFileLayerFilterdByTargets<S>
 where
@@ -68,32 +49,6 @@ where
 {
     let file_filter = filter::db_only(false);
     let filename = crate::writer::log_filename(LogType::Db);
-    let make_writer = writer::rolling_file(filename);
-
-    layer::bunyan::bunyan_file_format(name, make_writer).with_filter(file_filter)
-}
-
-// system log
-
-/// (system log) bunyan形式で標準出力に書き込むフォーマッタ
-#[allow(unused)]
-pub(crate) fn bunyan_stdio_filtered_by_level<S>(name: &str) -> BunyanStdioLayerFilterdByLevel<S>
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-{
-    let stdio_filter = filter::system(true);
-
-    layer::bunyan::bunyan_stdio_format(name).with_filter(stdio_filter)
-}
-
-/// (system log) bunyan形式でファイルに書き込むフォーマッタ
-#[allow(unused)]
-pub(crate) fn bunyan_file_not_filtered<S>(name: &str) -> BunyanRollingFileLayerFilterdByLevel<S>
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-{
-    let file_filter = filter::system(false);
-    let filename = crate::writer::log_filename(LogType::System);
     let make_writer = writer::rolling_file(filename);
 
     layer::bunyan::bunyan_file_format(name, make_writer).with_filter(file_filter)
