@@ -54,9 +54,10 @@ impl SuumoRepository for SuumoRepositoryImpl {
     ) -> Result<Vec<Url>> {
         // 検索条件を選択し、賃貸一覧ページの1ページ目のURLを取得する
         let mut url = crawler.url_of_room_list(area.clone(), station).await?;
+        let crawl_delay = get_usize_of_env_var("CRAWL_DELAY") as u64;
 
         // 最後のページ番号を確認し、各ページのURLを生成する
-        crawler.urls_of_room_list(&mut url).await
+        crawler.urls_of_room_list(&mut url, crawl_delay).await
     }
 
     /// 住居の属する地域や、通勤先の駅を指定して、賃貸の概要とURLを取得する
@@ -70,6 +71,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
     ) -> Result<RoomHeaders> {
         // 各賃貸一覧ページから住居情報や詳細ページへのURLを取得する
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
+        let crawl_delay = get_usize_of_env_var("CRAWL_DELAY") as u64;
 
         // プログレスバーの準備
         let pb_message = "[RoomHeader - Processing] Web Scraping...";
@@ -81,7 +83,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
             .map(|(url, area, station, pb_urls)| async move {
                 // 対象ページをスクレイピングする
                 let room_headers = crawler
-                    .room_headers_in_list_page(&url, &area, &station)
+                    .room_headers_in_list_page(&url, &area, &station, crawl_delay)
                     .await
                     .context("Fail to parse room headers infomation.")?;
 
@@ -113,6 +115,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
     async fn raw_rooms(&self, crawler: &Self::Crawler, urls: Vec<Url>) -> Result<RawRooms> {
         // 各賃貸一覧ページから住居情報や詳細ページへのURLを取得する
         let buffered_n = get_usize_of_env_var("MAX_CONCURRENCY");
+        let crawl_delay = get_usize_of_env_var("CRAWL_DELAY") as u64;
 
         // プログレスバーの準備
         let pb_message = "[RawRoom - Processing] Web Scraping...";
@@ -124,7 +127,7 @@ impl SuumoRepository for SuumoRepositoryImpl {
             .map(|(url, pb_urls)| async move {
                 // 対象ページをスクレイピングする
                 let raw_rooms = crawler
-                    .raw_room_in_detail_page(&url)
+                    .raw_room_in_detail_page(&url, crawl_delay)
                     .await
                     .context("Fail to parse room details infomation.")?;
 

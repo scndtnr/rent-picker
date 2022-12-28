@@ -56,10 +56,12 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
     // 最後のページ番号を確認し、各ページのURLを生成する
     #[tracing::instrument(level = "trace", skip_all, fields(url=url.as_str()), err(Debug))]
-    async fn urls_of_room_list(&self, url: &mut Url) -> Result<Vec<Url>> {
+    async fn urls_of_room_list(&self, url: &mut Url, crawl_delay: u64) -> Result<Vec<Url>> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
-        self.sleep_by_secs(1).await;
+
+        // 指定秒数スリープする
+        self.sleep_by_secs(crawl_delay).await;
 
         // ページネーションのパーツから最後のページ番号を取得する
         let html = res.text().await?;
@@ -103,12 +105,13 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
         url: &Url,
         area: &TargetArea,
         station: &str,
+        crawl_delay: u64,
     ) -> Result<RoomHeaders> {
         // 賃貸一覧ページに遷移する
         let res = self.client().get(url.as_str()).send().await?;
 
-        // 1秒スリープする
-        self.sleep_by_secs(1).await;
+        // 指定秒数スリープする
+        self.sleep_by_secs(crawl_delay).await;
 
         // 住居情報を取得する
         let url_domain = format!("{}://{}", url.scheme(), url.domain().unwrap());
@@ -255,7 +258,7 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
 
     /// 賃貸一覧ページから賃貸情報や詳細ページのURLを取得する
     #[tracing::instrument(level = "trace", skip_all, fields(url=url.as_str()) err(Debug))]
-    async fn raw_room_in_detail_page(&self, url: &Url) -> Result<RawRoom> {
+    async fn raw_room_in_detail_page(&self, url: &Url, crawl_delay: u64) -> Result<RawRoom> {
         // 賃貸詳細ページに遷移する
         let res = match self.client().get(url.as_str()).send().await {
             Ok(res) => res,
@@ -269,8 +272,8 @@ pub trait SuumoCrawler: HttpClient + HtmlParser {
             }
         };
 
-        // 1秒スリープする
-        self.sleep_by_secs(1).await;
+        // 指定秒数スリープする
+        self.sleep_by_secs(crawl_delay).await;
 
         // リダイレクトURLを束縛しておく
         let redirect_url = res.url().clone();
